@@ -15,6 +15,7 @@ const Navbar = () => {
           {[
             { to: "/", label: "Home" },
             { to: "/dashboard", label: "Dashboard" },
+            { to: "/history", label: "History" },
           ].map((l) => (
             <Link
               key={l.to}
