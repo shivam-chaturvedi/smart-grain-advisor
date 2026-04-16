@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import { mockDashboardData, mockPriceForecast } from "@/lib/mockData";
 import {
   Thermometer,
   Droplets,
@@ -65,7 +66,9 @@ const Dashboard = () => {
       const fc = await getPriceForecast();
       setForecast(fc);
     } catch {
-      toast.error("Failed to load dashboard data");
+      toast.error("Backend unavailable — showing demo data");
+      setData(mockDashboardData);
+      setForecast(mockPriceForecast);
     } finally {
       setLoading(false);
     }
