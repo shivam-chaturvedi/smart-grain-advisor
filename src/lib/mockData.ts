@@ -1,4 +1,5 @@
 import type { DashboardData, PriceForecast } from "./api";
+import type { SensorHistoryEntry } from "@/pages/History";
 
 export const mockDashboardData: DashboardData = {
   temperature: 28.5,
@@ -78,3 +79,23 @@ export const mockPriceForecast: PriceForecast = {
   best_price: 2450,
   trend: "upward",
 };
+
+const riskLevels = ["LOW", "LOW", "MODERATE", "MODERATE", "HIGH", "CRITICAL"];
+const sources: ("sensor" | "manual")[] = ["sensor", "sensor", "sensor", "manual", "sensor", "sensor"];
+
+export const mockSensorHistory: SensorHistoryEntry[] = Array.from({ length: 20 }, (_, i) => {
+  const d = new Date();
+  d.setHours(d.getHours() - (20 - i) * 4);
+  const risk = riskLevels[Math.floor(Math.random() * riskLevels.length)];
+  return {
+    id: i + 1,
+    timestamp: d.toLocaleString(),
+    temperature: +(24 + Math.random() * 10).toFixed(1),
+    humidity: +(50 + Math.random() * 25).toFixed(1),
+    co2: Math.round(350 + Math.random() * 300),
+    quantity: Math.round(100 + Math.random() * 100),
+    risk_level: risk,
+    risk_score: +(Math.random() * 80).toFixed(1),
+    source: sources[Math.floor(Math.random() * sources.length)],
+  };
+});
