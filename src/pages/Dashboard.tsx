@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import { mockDashboardData, mockPriceForecast } from "@/lib/mockData";
 import {
   Thermometer,
   Droplets,
