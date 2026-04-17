@@ -1,4 +1,4 @@
-import { TrendingUp, Calendar, IndianRupee } from "lucide-react";
+import { TrendingUp, Calendar, IndianRupee, Sparkles } from "lucide-react";
 
 interface Props {
   action: string;
@@ -8,28 +8,44 @@ interface Props {
   expectedTotalValue: number;
 }
 
-const actionStyle: Record<string, string> = {
-  SELL: "border-destructive/30 bg-destructive/5",
-  HOLD: "border-primary/30 bg-primary/5",
-};
-
-const actionBadge: Record<string, string> = {
-  SELL: "bg-destructive text-destructive-foreground",
-  HOLD: "bg-primary text-primary-foreground",
+const styles: Record<string, { bg: string; chip: string; glow: string }> = {
+  SELL: {
+    bg: "bg-gradient-to-br from-destructive/10 via-card to-card border-destructive/30",
+    chip: "bg-destructive text-destructive-foreground",
+    glow: "shadow-[0_8px_32px_-4px_hsl(var(--destructive)/0.35)]",
+  },
+  HOLD: {
+    bg: "bg-gradient-to-br from-primary/10 via-card to-card border-primary/30",
+    chip: "bg-primary text-primary-foreground",
+    glow: "shadow-[0_8px_32px_-4px_hsl(var(--primary)/0.35)]",
+  },
 };
 
 const RecommendationPanel = ({ action, reason, recommendedDay, expectedPrice, expectedTotalValue }: Props) => {
   const upper = action?.toUpperCase() ?? "HOLD";
-  const style = actionStyle[upper] ?? "border-warning/30 bg-warning/5";
-  const badge = actionBadge[upper] ?? "bg-warning text-warning-foreground";
+  const s = styles[upper] ?? {
+    bg: "bg-gradient-to-br from-warning/10 via-card to-card border-warning/30",
+    chip: "bg-warning text-warning-foreground",
+    glow: "shadow-[0_8px_32px_-4px_hsl(var(--warning)/0.35)]",
+  };
 
   return (
-    <div className={`rounded-lg border-2 p-5 ${style}`}>
-      <div className="mb-4 flex items-center justify-between">
-        <h3 className="text-sm font-medium text-muted-foreground">AI Recommendation</h3>
-        <span className={`rounded px-3 py-1 text-sm font-bold ${badge}`}>{upper}</span>
+    <div className={`relative overflow-hidden rounded-xl border-2 p-6 ${s.bg} ${s.glow}`}>
+      <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-gradient-to-br from-current/5 to-transparent opacity-30" />
+      <div className="mb-5 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Sparkles className="h-4 w-4 text-primary" strokeWidth={1.5} />
+          <h3 className="text-xs uppercase tracking-widest text-muted-foreground" style={{ fontWeight: 500 }}>AI Recommendation</h3>
+        </div>
+        <span className={`rounded-md px-4 py-1.5 text-sm tracking-wider shadow-3d-sm ${s.chip}`} style={{ fontWeight: 600 }}>
+          {upper}
+        </span>
       </div>
-      <p className="mb-5 text-sm leading-relaxed text-foreground/80">{reason}</p>
+
+      <p className="mb-6 text-base leading-relaxed text-foreground/85" style={{ fontWeight: 300 }}>
+        {reason}
+      </p>
+
       <div className="grid grid-cols-3 gap-3">
         <MiniStat icon={Calendar} label="Best Day" value={`Day ${recommendedDay}`} />
         <MiniStat icon={IndianRupee} label="Expected Price" value={`₹${expectedPrice?.toLocaleString()}`} />
@@ -40,10 +56,10 @@ const RecommendationPanel = ({ action, reason, recommendedDay, expectedPrice, ex
 };
 
 const MiniStat = ({ icon: Icon, label, value }: { icon: typeof Calendar; label: string; value: string }) => (
-  <div className="rounded-md bg-card p-3 text-center card-shadow">
-    <Icon className="mx-auto mb-1 h-4 w-4 text-primary" />
-    <p className="text-xs text-muted-foreground">{label}</p>
-    <p className="text-sm font-semibold text-foreground">{value}</p>
+  <div className="rounded-lg border bg-card p-4 text-center shadow-3d-sm shadow-3d-hover">
+    <Icon className="mx-auto mb-2 h-4 w-4 text-primary" strokeWidth={1.5} />
+    <p className="text-[10px] uppercase tracking-wider text-muted-foreground" style={{ fontWeight: 500 }}>{label}</p>
+    <p className="stat-number mt-1 text-base leading-tight">{value}</p>
   </div>
 );
 

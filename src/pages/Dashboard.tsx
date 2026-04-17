@@ -32,6 +32,7 @@ import {
   type PriceForecast,
   type SensorData,
 } from "@/lib/api";
+import { detectChanges } from "@/lib/notifications";
 
 const REFRESH_MS = 30_000;
 
@@ -62,6 +63,12 @@ const Dashboard = () => {
         result = await getCurrentStatus();
       }
       setData(result);
+      detectChanges({
+        action: result.recommendation?.action,
+        temperature: result.temperature,
+        humidity: result.humidity,
+        co2: result.co2,
+      });
 
       const fc = await getPriceForecast();
       setForecast(fc);
@@ -69,6 +76,12 @@ const Dashboard = () => {
       toast.error("Backend unavailable — showing demo data");
       setData(mockDashboardData);
       setForecast(mockPriceForecast);
+      detectChanges({
+        action: mockDashboardData.recommendation?.action,
+        temperature: mockDashboardData.temperature,
+        humidity: mockDashboardData.humidity,
+        co2: mockDashboardData.co2,
+      });
     } finally {
       setLoading(false);
     }
@@ -112,25 +125,30 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background grain-texture">
       <Navbar />
 
-      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6">
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
         {/* Header */}
-        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <h1 className="text-xl font-semibold text-foreground">Wheat Storage Dashboard</h1>
-            <p className="text-sm text-muted-foreground">Real-time monitoring and AI recommendations</p>
+            <p className="mb-2 text-xs uppercase tracking-[0.2em] text-primary" style={{ fontWeight: 500 }}>Live Monitoring</p>
+            <h1 className="text-4xl tracking-tight text-foreground sm:text-5xl" style={{ fontWeight: 300 }}>
+              Wheat Storage <span style={{ fontWeight: 500 }}>Dashboard</span>
+            </h1>
+            <p className="mt-2 text-sm text-muted-foreground" style={{ fontWeight: 300 }}>
+              Real-time monitoring and AI-powered selling recommendations
+            </p>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={handleRefresh} disabled={loading}>
-              {loading ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="mr-1.5 h-3.5 w-3.5" />}
+            <button onClick={handleRefresh} disabled={loading} className="btn-3d btn-3d-secondary text-sm disabled:opacity-60">
+              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
               Refresh
-            </Button>
-            <Button variant="outline" size="sm" onClick={() => setModalOpen(true)}>
-              <Edit3 className="mr-1.5 h-3.5 w-3.5" />
+            </button>
+            <button onClick={() => setModalOpen(true)} className="btn-3d text-sm">
+              <Edit3 className="h-4 w-4" />
               Manual Input
-            </Button>
+            </button>
           </div>
         </div>
 
@@ -256,19 +274,21 @@ const Dashboard = () => {
 
 /* Helpers */
 const Section = ({ title, icon: Icon, children }: { title: string; icon: typeof Thermometer; children: React.ReactNode }) => (
-  <div className="rounded-lg border bg-card p-5 card-shadow">
-    <div className="mb-4 flex items-center gap-2">
-      <Icon className="h-4 w-4 text-primary" />
-      <h2 className="text-sm font-semibold text-foreground">{title}</h2>
+  <div className="rounded-xl border bg-card p-6 shadow-3d">
+    <div className="mb-5 flex items-center gap-2.5">
+      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary shadow-3d-sm">
+        <Icon className="h-4 w-4" strokeWidth={1.5} />
+      </div>
+      <h2 className="text-sm uppercase tracking-wider text-foreground" style={{ fontWeight: 500 }}>{title}</h2>
     </div>
     {children}
   </div>
 );
 
 const Mini = ({ label, value }: { label: string; value: string }) => (
-  <div className="rounded-md border bg-accent/30 p-3 text-center">
-    <p className="text-[10px] text-muted-foreground">{label}</p>
-    <p className="text-sm font-semibold text-foreground">{value}</p>
+  <div className="rounded-lg border bg-card p-4 text-center shadow-3d-sm">
+    <p className="mb-1 text-[10px] uppercase tracking-wider text-muted-foreground" style={{ fontWeight: 500 }}>{label}</p>
+    <p className="stat-number text-base">{value}</p>
   </div>
 );
 

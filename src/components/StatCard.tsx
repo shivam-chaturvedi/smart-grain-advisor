@@ -9,17 +9,15 @@ interface StatCardProps {
 }
 
 const StatCard = ({ label, value, unit, icon: Icon, color = "text-primary" }: StatCardProps) => (
-  <div className="flex items-center gap-3 rounded-lg border bg-card p-4 card-shadow">
-    <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-accent ${color}`}>
-      <Icon className="h-5 w-5" />
+  <div className="group relative overflow-hidden rounded-xl border bg-card p-5 shadow-3d shadow-3d-hover">
+    <div className={`mb-3 flex h-11 w-11 items-center justify-center rounded-lg bg-accent ${color} shadow-3d-sm`}>
+      <Icon className="h-5 w-5" strokeWidth={1.5} />
     </div>
-    <div className="min-w-0">
-      <p className="text-xs font-medium text-muted-foreground">{label}</p>
-      <p className="text-lg font-semibold leading-tight text-foreground">
-        {value}
-        {unit && <span className="ml-0.5 text-xs font-normal text-muted-foreground">{unit}</span>}
-      </p>
-    </div>
+    <p className="mb-1 text-[11px] uppercase tracking-wider text-muted-foreground" style={{ fontWeight: 500 }}>{label}</p>
+    <p className="stat-number text-3xl leading-none">
+      {value}
+      {unit && <span className="ml-1 text-sm font-light text-muted-foreground">{unit}</span>}
+    </p>
   </div>
 );
 

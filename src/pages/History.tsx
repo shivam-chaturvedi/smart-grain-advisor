@@ -58,22 +58,27 @@ const History = () => {
   } : null;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background grain-texture">
       <Navbar />
-      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6">
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
         {/* Header */}
-        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <h1 className="flex items-center gap-2 text-xl font-semibold text-foreground">
-              <HistoryIcon className="h-5 w-5 text-primary" />
-              Sensor History
+            <p className="mb-2 text-xs uppercase tracking-[0.2em] text-primary" style={{ fontWeight: 500 }}>Archive</p>
+            <h1 className="flex items-center gap-3 text-4xl tracking-tight text-foreground sm:text-5xl" style={{ fontWeight: 300 }}>
+              <span className="flex h-12 w-12 items-center justify-center rounded-xl gradient-primary text-primary-foreground shadow-3d">
+                <HistoryIcon className="h-5 w-5" strokeWidth={1.5} />
+              </span>
+              Sensor <span style={{ fontWeight: 500 }}>History</span>
             </h1>
-            <p className="text-sm text-muted-foreground">Previous sensor readings and risk assessments</p>
+            <p className="mt-2 text-sm text-muted-foreground" style={{ fontWeight: 300 }}>
+              Previous sensor readings, manual inputs and risk assessments
+            </p>
           </div>
-          <Button variant="outline" size="sm" onClick={fetchHistory} disabled={loading}>
-            {loading ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="mr-1.5 h-3.5 w-3.5" />}
+          <button onClick={fetchHistory} disabled={loading} className="btn-3d btn-3d-secondary text-sm disabled:opacity-60">
+            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
             Refresh
-          </Button>
+          </button>
         </div>
 
         {/* Summary Cards */}
