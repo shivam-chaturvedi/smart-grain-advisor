@@ -150,12 +150,12 @@ const History = () => {
 };
 
 const SummaryCard = ({ icon: Icon, label, value, accent }: { icon: typeof Thermometer; label: string; value: string; accent?: boolean }) => (
-  <div className="rounded-lg border bg-card p-4 card-shadow">
-    <div className="mb-1 flex items-center gap-1.5">
-      <Icon className={`h-3.5 w-3.5 ${accent ? "text-destructive" : "text-primary"}`} />
-      <span className="text-[11px] text-muted-foreground">{label}</span>
+  <div className="rounded-xl border bg-card p-5 shadow-3d shadow-3d-hover">
+    <div className={`mb-3 flex h-10 w-10 items-center justify-center rounded-lg shadow-3d-sm ${accent ? "bg-destructive/10 text-destructive" : "bg-primary/10 text-primary"}`}>
+      <Icon className="h-4 w-4" strokeWidth={1.5} />
     </div>
-    <p className={`text-lg font-semibold ${accent ? "text-destructive" : "text-foreground"}`}>{value}</p>
+    <p className="mb-1 text-[11px] uppercase tracking-wider text-muted-foreground" style={{ fontWeight: 500 }}>{label}</p>
+    <p className={`stat-number text-2xl ${accent ? "!bg-none text-destructive" : ""}`}>{value}</p>
   </div>
 );
 
