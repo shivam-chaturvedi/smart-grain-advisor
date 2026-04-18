@@ -1,14 +1,18 @@
 import { useEffect, useState } from "react";
-import { Bell, CheckCheck, Trash2, AlertTriangle, TrendingUp, Activity, Info } from "lucide-react";
+import { Bell, CheckCheck, Trash2, AlertTriangle, TrendingUp, Activity, Info, MessageCircle } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import BackendUnavailableBanner from "@/components/BackendUnavailableBanner";
+import RecommendationPanel from "@/components/RecommendationPanel";
 import {
   type AppNotification,
+  type DashboardData,
   BackendUnavailableError,
   getNotifications,
+  getCurrentStatus,
   markAllNotificationsRead,
   clearAllNotifications,
 } from "@/lib/api";
+import { sendWhatsAppAlerts } from "@/lib/whatsapp";
 import { formatTimestamp } from "@/lib/format";
 import { toast } from "sonner";
 
@@ -19,25 +23,34 @@ const typeMeta: Record<AppNotification["type"], { icon: typeof Bell; bg: string;
   info:      { icon: Info,         bg: "bg-muted",          color: "text-muted-foreground", label: "Info" },
 };
 
+
 const Notifications = () => {
   const [items, setItems] = useState<AppNotification[]>([]);
+  const [aiData, setAiData] = useState<DashboardData | null>(null);
   const [backendDown, setBackendDown] = useState(false);
+  const [whatsappSending, setWhatsappSending] = useState(false);
+
+  const loadData = async () => {
+    try {
+      const [fresh, status] = await Promise.all([
+        getNotifications(50),
+        getCurrentStatus().catch(() => null),
+      ]);
+      setItems(fresh);
+      if (status) setAiData(status);
+      setBackendDown(false);
+    } catch (e) {
+      if (e instanceof BackendUnavailableError) {
+        setBackendDown(true);
+      } else {
+        toast.error(e instanceof Error ? e.message : "Failed to load notifications");
+      }
+      setItems([]);
+    }
+  };
 
   useEffect(() => {
-    const refresh = async () => {
-      try {
-        setItems(await getNotifications(50));
-        setBackendDown(false);
-      } catch (e) {
-        if (e instanceof BackendUnavailableError) {
-          setBackendDown(true);
-        } else {
-          toast.error(e instanceof Error ? e.message : "Failed to load notifications");
-        }
-        setItems([]);
-      }
-    };
-    refresh();
+    loadData();
   }, []);
 
   const unread = items.filter((i) => !i.read).length;
@@ -45,14 +58,10 @@ const Notifications = () => {
   const handleMarkAllRead = async () => {
     try {
       await markAllNotificationsRead();
-      setItems(await getNotifications(50));
-      setBackendDown(false);
+      await loadData();
     } catch (e) {
-      if (e instanceof BackendUnavailableError) {
-        setBackendDown(true);
-      } else {
-        toast.error("Failed to mark notifications read");
-      }
+      if (e instanceof BackendUnavailableError) setBackendDown(true);
+      else toast.error("Failed to mark notifications read");
     }
   };
 
@@ -60,13 +69,19 @@ const Notifications = () => {
     try {
       await clearAllNotifications();
       setItems([]);
-      setBackendDown(false);
     } catch (e) {
-      if (e instanceof BackendUnavailableError) {
-        setBackendDown(true);
-      } else {
-        toast.error("Failed to clear notifications");
-      }
+      if (e instanceof BackendUnavailableError) setBackendDown(true);
+      else toast.error("Failed to clear notifications");
+    }
+  };
+
+  const handleSendWhatsApp = async () => {
+    const unreadItems = items.filter((i) => !i.read);
+    setWhatsappSending(true);
+    try {
+      await sendWhatsAppAlerts(unreadItems, { aiRec: aiData?.recommendation ?? null });
+    } finally {
+      setWhatsappSending(false);
     }
   };
 
@@ -96,10 +111,35 @@ const Notifications = () => {
               <Trash2 className="h-4 w-4" />
               Clear
             </button>
+            <button
+              onClick={handleSendWhatsApp}
+              disabled={whatsappSending}
+              className="btn-3d text-xs sm:text-sm flex-1 sm:flex-none flex items-center gap-2 rounded-lg px-4 py-2 font-medium text-white shadow-3d transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+              style={{ background: "linear-gradient(135deg, #25D366 0%, #128C7E 100%)" }}
+            >
+              <MessageCircle className="h-4 w-4 shrink-0" />
+              {whatsappSending ? "Sending…" : "Send WhatsApp Alert"}
+            </button>
           </div>
         </div>
 
         {backendDown ? <BackendUnavailableBanner className="mb-6" /> : null}
+
+        {/* Live AI Recommendation card */}
+        {!backendDown && aiData?.recommendation && (
+          <div className="mb-6">
+            <p className="mb-2 text-[10px] uppercase tracking-[0.2em] text-primary" style={{ fontWeight: 500 }}>
+              Live AI Recommendation
+            </p>
+            <RecommendationPanel
+              action={aiData.recommendation.action}
+              reason={aiData.recommendation.reason}
+              recommendedDay={aiData.recommendation.recommended_day}
+              expectedPrice={aiData.recommendation.expected_price}
+              expectedTotalValue={aiData.recommendation.expected_total_value}
+            />
+          </div>
+        )}
 
         {backendDown ? null : items.length === 0 ? (
           <div className="rounded-2xl border bg-card p-16 text-center shadow-3d">

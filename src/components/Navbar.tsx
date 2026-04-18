@@ -1,7 +1,29 @@
 import { Link, useLocation } from "react-router-dom";
 import { Wheat, Bell, Menu, X } from "lucide-react";
 import { useEffect, useState } from "react";
-import { getUnreadCount } from "@/lib/api";
+import { getNotifications, getCurrentStatus } from "@/lib/api";
+import { sendWhatsAppAlerts } from "@/lib/whatsapp";
+
+const POLL_MS = Number(import.meta.env.VITE_ALERT_POLL_MS) || 15_000;
+const SEEN_KEY = "naysa_seen_notification_ids";
+
+function loadSeen(): Set<string> {
+  try {
+    const raw = sessionStorage.getItem(SEEN_KEY);
+    return raw ? new Set(JSON.parse(raw) as string[]) : new Set();
+  } catch {
+    return new Set();
+  }
+}
+
+function saveSeen(ids: Set<string>) {
+  try {
+    sessionStorage.setItem(SEEN_KEY, JSON.stringify([...ids]));
+  } catch { /* ignore */ }
+}
+
+// true once the very first fetch has completed and seenIds is populated
+let firstLoadDone = false;
 
 const Navbar = () => {
   const { pathname } = useLocation();
@@ -10,16 +32,44 @@ const Navbar = () => {
 
   useEffect(() => {
     let mounted = true;
-    const update = async () => {
+
+    const poll = async () => {
       try {
-        const unread = await getUnreadCount();
-        if (mounted) setCount(unread);
+        const [notifications, status] = await Promise.all([
+          getNotifications(50),
+          getCurrentStatus().catch(() => null),
+        ]);
+        if (!mounted) return;
+
+        setCount(notifications.filter((n) => !n.read).length);
+
+        const seen = loadSeen();
+
+        if (!firstLoadDone) {
+          // First successful fetch — record all existing IDs, send nothing
+          notifications.forEach((n) => seen.add(n.id));
+          saveSeen(seen);
+          firstLoadDone = true;
+          return;
+        }
+
+        // Detect brand-new IDs
+        const brandNew = notifications.filter((n) => !seen.has(n.id));
+        if (brandNew.length > 0) {
+          notifications.forEach((n) => seen.add(n.id));
+          saveSeen(seen);
+          sendWhatsAppAlerts(brandNew, {
+            silent: true,
+            aiRec: status?.recommendation ?? null,
+          });
+        }
       } catch {
         if (mounted) setCount(0);
       }
     };
-    update();
-    const id = window.setInterval(update, 15_000);
+
+    poll();
+    const id = window.setInterval(poll, POLL_MS);
     return () => {
       mounted = false;
       window.clearInterval(id);
