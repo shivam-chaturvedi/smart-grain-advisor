@@ -357,57 +357,6 @@ const Dashboard = () => {
           </div>
         )}
       </div>
-                  <p className="mb-2 text-[11px] uppercase tracking-wider text-muted-foreground" style={{ fontWeight: 500 }}>
-                    Key Insights
-                  </p>
-                  <ul className="space-y-2 text-sm text-foreground/90">
-                    <li>
-                      <span className="text-muted-foreground">Action:</span>{" "}
-                      <span className="font-semibold">{data.recommendation?.action ?? "—"}</span>
-                    </li>
-                    <li className="text-muted-foreground">
-                      {data.recommendation?.reason ?? "No recommendation reason available."}
-                    </li>
-                    <li>
-                      <span className="text-muted-foreground">Risk:</span>{" "}
-                      <span className="font-semibold">{data.risk_level ?? "—"}</span>{" "}
-                      <span className="text-muted-foreground">({data.risk_score?.toFixed(1) ?? "—"}/100)</span>
-                    </li>
-                    <li>
-                      <span className="text-muted-foreground">Safe Storage:</span>{" "}
-                      <span className="font-semibold">{data.safe_storage_days?.toFixed(1) ?? "—"} days</span>
-                    </li>
-                    {forecast ? (
-                      <li>
-                        <span className="text-muted-foreground">Best Sell Day:</span>{" "}
-                        <span className="font-semibold">Day {forecast.best_day}</span>{" "}
-                        <span className="text-muted-foreground">at ₹{forecast.best_price?.toLocaleString()}</span>
-                      </li>
-                    ) : null}
-                    {data.market_analysis ? (
-                      <li>
-                        <span className="text-muted-foreground">Market:</span>{" "}
-                        <span className="font-semibold">{data.market_analysis.trend}</span>{" "}
-                        <span className="text-muted-foreground">({data.market_analysis.volatility?.toFixed(1)}% vol)</span>
-                      </li>
-                    ) : null}
-                    {data.recommendations?.length ? (
-                      <li>
-                        <span className="text-muted-foreground">Notes:</span>{" "}
-                        <span className="text-foreground/90">{data.recommendations.slice(0, 2).join(" • ")}</span>
-                      </li>
-                    ) : null}
-                  </ul>
-                </div>
-              </div>
-            </Section>
-          </div>
-        ) : (
-          <div className="rounded-lg border bg-card p-12 text-center card-shadow">
-            <p className="text-sm text-muted-foreground">No sensor data yet. Use “Manual Input” or send readings to `POST /api/sensor-data`.</p>
-          </div>
-        )}
-      </div>
 
       <ManualInputModal open={modalOpen} onClose={() => setModalOpen(false)} onSubmit={handleManualSubmit} />
     </div>
