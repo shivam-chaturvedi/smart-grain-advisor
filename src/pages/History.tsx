@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import Navbar from "@/components/Navbar";
 import BackendUnavailableBanner from "@/components/BackendUnavailableBanner";
 import { BackendUnavailableError, getSensorHistory, type SensorHistoryEntry } from "@/lib/api";
+import { formatTimestamp } from "@/lib/format";
 
 const riskColor = (level: string) => {
   switch (level.toUpperCase()) {
@@ -96,10 +97,19 @@ const History = () => {
           <>
             {/* Mobile card list */}
             <div className="grid gap-3 sm:hidden">
-              {data.map((entry) => (
+              {data.map((entry) => {
+                const ts = formatTimestamp(entry.timestamp);
+                return (
                 <div key={entry.id} className="rounded-xl border bg-card p-4 shadow-3d-sm">
-                  <div className="flex items-center justify-between gap-2 mb-3">
-                    <span className="font-mono text-[11px] text-muted-foreground truncate">{entry.timestamp}</span>
+                  <div className="flex items-start justify-between gap-2 mb-3">
+                    <div className="min-w-0">
+                      <p className="text-xs text-foreground" style={{ fontWeight: 500 }}>
+                        {ts.weekday}, {ts.date}
+                      </p>
+                      <p className="text-[11px] text-muted-foreground">
+                        {ts.time} · <span className="text-muted-foreground/70">{ts.relative}</span>
+                      </p>
+                    </div>
                     <span className={`shrink-0 inline-block rounded px-2 py-0.5 text-[10px] font-semibold uppercase ${riskColor(entry.risk_level)}`}>
                       {entry.risk_level}
                     </span>
@@ -117,7 +127,8 @@ const History = () => {
                     </span>
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
 
             {/* Desktop table */}
@@ -140,10 +151,15 @@ const History = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {data.map((entry, i) => (
+                    {data.map((entry, i) => {
+                      const ts = formatTimestamp(entry.timestamp);
+                      return (
                       <tr key={entry.id} className={`border-b last:border-0 transition-colors hover:bg-muted/20 ${i % 2 === 0 ? "" : "bg-muted/10"}`}>
                         <td className="px-4 py-2.5 text-muted-foreground">{entry.id}</td>
-                        <td className="px-4 py-2.5 font-mono text-xs text-foreground whitespace-nowrap">{entry.timestamp}</td>
+                        <td className="px-4 py-2.5 text-xs whitespace-nowrap">
+                          <div className="text-foreground" style={{ fontWeight: 500 }}>{ts.weekday}, {ts.date}</div>
+                          <div className="text-muted-foreground">{ts.time} <span className="text-muted-foreground/60">· {ts.relative}</span></div>
+                        </td>
                         <td className="px-4 py-2.5 font-mono text-xs text-muted-foreground">{entry.device_id ?? "—"}</td>
                         <td className="px-4 py-2.5 text-right tabular-nums text-foreground">{entry.temperature.toFixed(1)}</td>
                         <td className="px-4 py-2.5 text-right tabular-nums text-foreground">{entry.humidity.toFixed(1)}</td>
@@ -162,7 +178,8 @@ const History = () => {
                           </span>
                         </td>
                       </tr>
-                    ))}
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>

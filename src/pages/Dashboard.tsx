@@ -300,48 +300,48 @@ const Dashboard = () => {
           <div className="mt-6">
             <Section title="Detailed Report" icon={FileText}>
               <div className="grid gap-4 lg:grid-cols-3">
-                <div className="lg:col-span-2">
-                  <div className="max-h-[32rem] overflow-y-auto rounded-lg border bg-accent/30 p-4 font-mono text-xs leading-relaxed text-foreground/80 whitespace-pre-wrap break-words">
+                <div className="lg:col-span-2 min-w-0">
+                  <div className="max-h-[24rem] sm:max-h-[32rem] overflow-y-auto overflow-x-auto rounded-lg border bg-accent/30 p-3 sm:p-4 font-mono text-[10px] sm:text-xs leading-relaxed text-foreground/80 whitespace-pre-wrap break-all sm:break-words">
                     {data.detailed_report}
                   </div>
                 </div>
-                <div className="rounded-lg border bg-card p-4 shadow-3d-sm">
+                <div className="rounded-lg border bg-card p-4 shadow-3d-sm min-w-0">
                   <p className="mb-2 text-[11px] uppercase tracking-wider text-muted-foreground" style={{ fontWeight: 500 }}>
                     Key Insights
                   </p>
-                  <ul className="space-y-2 text-sm text-foreground/90">
-                    <li>
+                  <ul className="space-y-2 text-xs sm:text-sm text-foreground/90">
+                    <li className="break-words">
                       <span className="text-muted-foreground">Action:</span>{" "}
                       <span className="font-semibold">{data.recommendation?.action ?? "—"}</span>
                     </li>
-                    <li className="text-muted-foreground">
+                    <li className="text-muted-foreground break-words">
                       {data.recommendation?.reason ?? "No recommendation reason available."}
                     </li>
-                    <li>
+                    <li className="break-words">
                       <span className="text-muted-foreground">Risk:</span>{" "}
                       <span className="font-semibold">{data.risk_level ?? "—"}</span>{" "}
                       <span className="text-muted-foreground">({data.risk_score?.toFixed(1) ?? "—"}/100)</span>
                     </li>
-                    <li>
+                    <li className="break-words">
                       <span className="text-muted-foreground">Safe Storage:</span>{" "}
                       <span className="font-semibold">{data.safe_storage_days?.toFixed(1) ?? "—"} days</span>
                     </li>
                     {forecast ? (
-                      <li>
+                      <li className="break-words">
                         <span className="text-muted-foreground">Best Sell Day:</span>{" "}
                         <span className="font-semibold">Day {forecast.best_day}</span>{" "}
                         <span className="text-muted-foreground">at ₹{forecast.best_price?.toLocaleString()}</span>
                       </li>
                     ) : null}
                     {data.market_analysis ? (
-                      <li>
+                      <li className="break-words">
                         <span className="text-muted-foreground">Market:</span>{" "}
                         <span className="font-semibold">{data.market_analysis.trend}</span>{" "}
                         <span className="text-muted-foreground">({data.market_analysis.volatility?.toFixed(1)}% vol)</span>
                       </li>
                     ) : null}
                     {data.recommendations?.length ? (
-                      <li>
+                      <li className="break-words">
                         <span className="text-muted-foreground">Notes:</span>{" "}
                         <span className="text-foreground/90">{data.recommendations.slice(0, 2).join(" • ")}</span>
                       </li>
@@ -352,7 +352,7 @@ const Dashboard = () => {
             </Section>
           </div>
         ) : (
-          <div className="rounded-lg border bg-card p-12 text-center card-shadow">
+          <div className="rounded-lg border bg-card p-8 sm:p-12 text-center card-shadow">
             <p className="text-sm text-muted-foreground">No sensor data yet. Use “Manual Input” or send readings to `POST /api/sensor-data`.</p>
           </div>
         )}
