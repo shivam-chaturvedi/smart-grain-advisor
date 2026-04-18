@@ -151,10 +151,15 @@ const History = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {data.map((entry, i) => (
+                    {data.map((entry, i) => {
+                      const ts = formatTimestamp(entry.timestamp);
+                      return (
                       <tr key={entry.id} className={`border-b last:border-0 transition-colors hover:bg-muted/20 ${i % 2 === 0 ? "" : "bg-muted/10"}`}>
                         <td className="px-4 py-2.5 text-muted-foreground">{entry.id}</td>
-                        <td className="px-4 py-2.5 font-mono text-xs text-foreground whitespace-nowrap">{entry.timestamp}</td>
+                        <td className="px-4 py-2.5 text-xs whitespace-nowrap">
+                          <div className="text-foreground" style={{ fontWeight: 500 }}>{ts.weekday}, {ts.date}</div>
+                          <div className="text-muted-foreground">{ts.time} <span className="text-muted-foreground/60">· {ts.relative}</span></div>
+                        </td>
                         <td className="px-4 py-2.5 font-mono text-xs text-muted-foreground">{entry.device_id ?? "—"}</td>
                         <td className="px-4 py-2.5 text-right tabular-nums text-foreground">{entry.temperature.toFixed(1)}</td>
                         <td className="px-4 py-2.5 text-right tabular-nums text-foreground">{entry.humidity.toFixed(1)}</td>
@@ -173,7 +178,8 @@ const History = () => {
                           </span>
                         </td>
                       </tr>
-                    ))}
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
