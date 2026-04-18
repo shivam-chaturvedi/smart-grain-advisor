@@ -50,22 +50,22 @@ const History = () => {
   return (
     <div className="min-h-screen bg-background grain-texture">
       <Navbar />
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
+      <div className="mx-auto max-w-7xl px-3 py-6 sm:px-6 sm:py-8">
         {/* Header */}
-        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <p className="mb-2 text-xs uppercase tracking-[0.2em] text-primary" style={{ fontWeight: 500 }}>Archive</p>
-            <h1 className="flex items-center gap-3 text-4xl tracking-tight text-foreground sm:text-5xl" style={{ fontWeight: 300 }}>
-              <span className="flex h-12 w-12 items-center justify-center rounded-xl gradient-primary text-primary-foreground shadow-3d">
-                <HistoryIcon className="h-5 w-5" strokeWidth={1.5} />
+        <div className="mb-6 sm:mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div className="min-w-0">
+            <p className="mb-2 text-[10px] sm:text-xs uppercase tracking-[0.2em] text-primary" style={{ fontWeight: 500 }}>Archive</p>
+            <h1 className="flex items-center gap-2.5 sm:gap-3 text-2xl sm:text-4xl md:text-5xl tracking-tight text-foreground" style={{ fontWeight: 300 }}>
+              <span className="flex h-9 w-9 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-xl gradient-primary text-primary-foreground shadow-3d">
+                <HistoryIcon className="h-4 w-4 sm:h-5 sm:w-5" strokeWidth={1.5} />
               </span>
               Sensor <span style={{ fontWeight: 500 }}>History</span>
             </h1>
-            <p className="mt-2 text-sm text-muted-foreground" style={{ fontWeight: 300 }}>
+            <p className="mt-2 text-xs sm:text-sm text-muted-foreground" style={{ fontWeight: 300 }}>
               Previous sensor readings, manual inputs and risk assessments
             </p>
           </div>
-          <button onClick={fetchHistory} disabled={loading} className="btn-3d btn-3d-secondary text-sm disabled:opacity-60">
+          <button onClick={fetchHistory} disabled={loading} className="btn-3d btn-3d-secondary text-xs sm:text-sm disabled:opacity-60 self-start sm:self-auto">
             {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
             Refresh
           </button>

@@ -76,15 +76,15 @@ const Conf = () => {
   return (
     <div className="min-h-screen bg-background grain-texture">
       <Navbar />
-      <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
-        <div className="mb-8">
-          <p className="mb-2 text-xs uppercase tracking-[0.2em] text-primary" style={{ fontWeight: 500 }}>
+      <div className="mx-auto max-w-3xl px-3 py-6 sm:px-6 sm:py-10">
+        <div className="mb-6 sm:mb-8">
+          <p className="mb-2 text-[10px] sm:text-xs uppercase tracking-[0.2em] text-primary" style={{ fontWeight: 500 }}>
             Config
           </p>
-          <h1 className="text-4xl tracking-tight text-foreground" style={{ fontWeight: 300 }}>
+          <h1 className="text-3xl sm:text-4xl tracking-tight text-foreground" style={{ fontWeight: 300 }}>
             Sensor <span style={{ fontWeight: 500 }}>Configuration</span>
           </h1>
-          <p className="mt-2 text-sm text-muted-foreground" style={{ fontWeight: 300 }}>
+          <p className="mt-2 text-xs sm:text-sm text-muted-foreground" style={{ fontWeight: 300 }}>
             Set default wheat quantity for device submissions. Sensors send only temperature/humidity/CO₂; the backend uses this quantity automatically.
           </p>
         </div>
@@ -92,7 +92,7 @@ const Conf = () => {
         {backendDown ? <BackendUnavailableBanner className="mb-6" /> : null}
 
         {backendDown ? null : (
-        <div className="rounded-2xl border bg-card p-7 shadow-3d">
+        <div className="rounded-2xl border bg-card p-5 sm:p-7 shadow-3d">
           {loading ? (
             <p className="text-sm text-muted-foreground">Loading…</p>
           ) : (
