@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import QuickAnalysisModal from "@/components/QuickAnalysisModal";
+import ScrollHero from "@/components/ScrollHero";
 import deviceFront from "@/assets/device-front.png";
 import deviceProduct from "@/assets/device-product.png";
 import deviceOpen from "@/assets/device-open.png";
