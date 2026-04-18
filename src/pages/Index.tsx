@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import QuickAnalysisModal from "@/components/QuickAnalysisModal";
+import ScrollHero from "@/components/ScrollHero";
 import deviceFront from "@/assets/device-front.png";
 import deviceProduct from "@/assets/device-product.png";
 import deviceOpen from "@/assets/device-open.png";
@@ -18,49 +19,8 @@ const Index = () => {
     <div className="min-h-screen bg-background grain-texture">
       <Navbar />
 
-      {/* HERO */}
-      <section className="relative overflow-hidden px-4 pt-20 pb-24">
-        <div className="absolute -left-32 top-10 h-72 w-72 rounded-full bg-primary/10 blur-3xl" />
-        <div className="absolute -right-32 top-32 h-72 w-72 rounded-full bg-secondary/10 blur-3xl" />
-
-        <div className="relative mx-auto max-w-5xl text-center">
-          <div className="mb-6 inline-flex items-center gap-2 rounded-full border bg-card/80 px-4 py-1.5 text-xs text-muted-foreground shadow-3d-sm backdrop-blur" style={{ fontWeight: 500 }}>
-            <Zap className="h-3 w-3 text-secondary" />
-            AI-Powered Agriculture · IoT Sensors · Market Intelligence
-          </div>
-          <h1 className="mb-6 text-5xl tracking-tight text-foreground sm:text-7xl" style={{ fontWeight: 300 }}>
-            Smart Sell <span className="bg-gradient-to-br from-primary to-primary-glow bg-clip-text text-transparent" style={{ fontWeight: 500 }}>Advisor</span>
-          </h1>
-          <p className="mx-auto mb-10 max-w-2xl text-lg leading-relaxed text-muted-foreground sm:text-xl" style={{ fontWeight: 300 }}>
-            AI-powered wheat storage optimization and market timing system.
-            Make data-driven decisions to maximize your harvest value.
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-4">
-            <Link to="/dashboard" className="btn-3d text-base">
-              Go to Dashboard
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-            <button onClick={() => setModal(true)} className="btn-3d btn-3d-secondary text-base">
-              Quick Analysis
-            </button>
-          </div>
-
-          {/* Stats strip */}
-          <div className="mt-16 grid grid-cols-2 gap-4 sm:grid-cols-4">
-            {[
-              { v: "30%", l: "Loss Reduction" },
-              { v: "15-20%", l: "Profit Increase" },
-              { v: "96%", l: "AI Confidence" },
-              { v: "24/7", l: "Live Monitoring" },
-            ].map((s) => (
-              <div key={s.l} className="rounded-xl border bg-card/70 p-5 shadow-3d backdrop-blur shadow-3d-hover">
-                <p className="stat-number text-3xl">{s.v}</p>
-                <p className="mt-1 text-xs uppercase tracking-wider text-muted-foreground" style={{ fontWeight: 500 }}>{s.l}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* SCROLL-DRIVEN HERO with frame animation */}
+      <ScrollHero onQuickAnalysis={() => setModal(true)} />
 
       {/* FEATURE CARDS */}
       <section className="mx-auto max-w-6xl px-4 pb-24">

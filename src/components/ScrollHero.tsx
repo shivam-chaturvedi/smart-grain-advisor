@@ -1,0 +1,248 @@
+import { useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
+import { ArrowRight, Zap } from "lucide-react";
+
+const FRAME_COUNT = 121;
+const framePath = (i: number) =>
+  `/hero-frames/frame_${String(i + 1).padStart(3, "0")}.jpg`;
+
+interface ScrollHeroProps {
+  onQuickAnalysis: () => void;
+}
+
+const ScrollHero = ({ onQuickAnalysis }: ScrollHeroProps) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const imagesRef = useRef<HTMLImageElement[]>([]);
+  const currentFrameRef = useRef(0);
+  const targetFrameRef = useRef(0);
+  const rafRef = useRef<number | null>(null);
+  const [loaded, setLoaded] = useState(0);
+  const [endReached, setEndReached] = useState(false);
+
+  // Preload frames
+  useEffect(() => {
+    let cancelled = false;
+    let count = 0;
+    const imgs: HTMLImageElement[] = [];
+    for (let i = 0; i < FRAME_COUNT; i++) {
+      const img = new Image();
+      img.src = framePath(i);
+      img.onload = () => {
+        if (cancelled) return;
+        count++;
+        setLoaded(count);
+        if (i === 0) drawFrame(0);
+      };
+      imgs[i] = img;
+    }
+    imagesRef.current = imgs;
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const drawFrame = (idx: number) => {
+    const canvas = canvasRef.current;
+    const img = imagesRef.current[idx];
+    if (!canvas || !img || !img.complete || img.naturalWidth === 0) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    const dpr = window.devicePixelRatio || 1;
+    const cw = canvas.clientWidth;
+    const ch = canvas.clientHeight;
+    if (canvas.width !== cw * dpr || canvas.height !== ch * dpr) {
+      canvas.width = cw * dpr;
+      canvas.height = ch * dpr;
+    }
+    // cover fit
+    const iw = img.naturalWidth;
+    const ih = img.naturalHeight;
+    const scale = Math.max((cw * dpr) / iw, (ch * dpr) / ih);
+    const dw = iw * scale;
+    const dh = ih * scale;
+    const dx = (cw * dpr - dw) / 2;
+    const dy = (ch * dpr - dh) / 2;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(img, dx, dy, dw, dh);
+  };
+
+  // Scroll mapping
+  useEffect(() => {
+    const animate = () => {
+      const current = currentFrameRef.current;
+      const target = targetFrameRef.current;
+      const diff = target - current;
+      if (Math.abs(diff) < 0.05) {
+        currentFrameRef.current = target;
+        drawFrame(Math.round(target));
+      } else {
+        currentFrameRef.current = current + diff * 0.18; // easing
+        drawFrame(Math.round(currentFrameRef.current));
+        rafRef.current = requestAnimationFrame(animate);
+        return;
+      }
+      rafRef.current = null;
+    };
+
+    const onScroll = () => {
+      const el = containerRef.current;
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      const vh = window.innerHeight;
+      const total = el.offsetHeight - vh; // scrollable distance
+      const scrolled = Math.min(Math.max(-rect.top, 0), total);
+      const progress = total > 0 ? scrolled / total : 0;
+      const target = progress * (FRAME_COUNT - 1);
+      targetFrameRef.current = target;
+      setEndReached(progress > 0.95);
+      if (rafRef.current == null) {
+        rafRef.current = requestAnimationFrame(animate);
+      }
+    };
+
+    const onResize = () => drawFrame(Math.round(currentFrameRef.current));
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onResize);
+    onScroll();
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onResize);
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    };
+  }, []);
+
+  const loadProgress = Math.round((loaded / FRAME_COUNT) * 100);
+
+  return (
+    // Tall container = scroll length. ~300vh gives a comfortable scroll feel.
+    <section ref={containerRef} className="relative" style={{ height: "320vh" }}>
+      {/* Sticky viewport */}
+      <div className="sticky top-0 h-screen w-full overflow-hidden bg-background">
+        {/* Canvas */}
+        <canvas
+          ref={canvasRef}
+          className="absolute inset-0 h-full w-full"
+          style={{ background: "hsl(var(--background))" }}
+        />
+
+        {/* Top vignette for legibility */}
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-background/70 via-background/10 to-background/80" />
+
+        {/* Loading state */}
+        {loaded < 8 && (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="text-xs uppercase tracking-[0.3em] text-muted-foreground" style={{ fontWeight: 400 }}>
+              Loading · {loadProgress}%
+            </div>
+          </div>
+        )}
+
+        {/* HERO content overlay (fades out as scroll progresses) */}
+        <div
+          className="absolute inset-0 flex items-center justify-center px-4 transition-opacity duration-500"
+          style={{ opacity: endReached ? 0 : 1, pointerEvents: endReached ? "none" : "auto" }}
+        >
+          <div className="relative mx-auto max-w-5xl text-center">
+            <div
+              className="mb-6 inline-flex items-center gap-2 rounded-full border bg-card/70 px-4 py-1.5 text-xs text-muted-foreground shadow-3d-sm backdrop-blur-md"
+              style={{ fontWeight: 500 }}
+            >
+              <Zap className="h-3 w-3 text-secondary" />
+              AI-Powered Agriculture · IoT Sensors · Market Intelligence
+            </div>
+            <h1
+              className="mb-6 text-5xl tracking-tight text-foreground sm:text-7xl drop-shadow-sm"
+              style={{ fontWeight: 300 }}
+            >
+              Smart Sell{" "}
+              <span
+                className="bg-gradient-to-br from-primary to-primary-glow bg-clip-text text-transparent"
+                style={{ fontWeight: 500 }}
+              >
+                Advisor
+              </span>
+            </h1>
+            <p
+              className="mx-auto mb-10 max-w-2xl text-lg leading-relaxed text-muted-foreground sm:text-xl"
+              style={{ fontWeight: 300 }}
+            >
+              AI-powered wheat storage optimization and market timing system.
+              Make data-driven decisions to maximize your harvest value.
+            </p>
+            <div className="flex flex-wrap items-center justify-center gap-4">
+              <Link to="/dashboard" className="btn-3d text-base">
+                Go to Dashboard
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+              <button onClick={onQuickAnalysis} className="btn-3d btn-3d-secondary text-base">
+                Quick Analysis
+              </button>
+            </div>
+
+            {/* Stats */}
+            <div className="mt-14 grid grid-cols-2 gap-4 sm:grid-cols-4">
+              {[
+                { v: "30%", l: "Loss Reduction" },
+                { v: "15-20%", l: "Profit Increase" },
+                { v: "96%", l: "AI Confidence" },
+                { v: "24/7", l: "Live Monitoring" },
+              ].map((s) => (
+                <div
+                  key={s.l}
+                  className="rounded-xl border bg-card/70 p-5 shadow-3d backdrop-blur-md"
+                >
+                  <p className="stat-number text-3xl">{s.v}</p>
+                  <p
+                    className="mt-1 text-xs uppercase tracking-wider text-muted-foreground"
+                    style={{ fontWeight: 500 }}
+                  >
+                    {s.l}
+                  </p>
+                </div>
+              ))}
+            </div>
+
+            <p
+              className="mt-10 text-[11px] uppercase tracking-[0.3em] text-muted-foreground/70"
+              style={{ fontWeight: 400 }}
+            >
+              ↓ Scroll to explore
+            </p>
+          </div>
+        </div>
+
+        {/* End-of-animation: Grain OS reveal */}
+        <div
+          className="pointer-events-none absolute inset-0 flex items-center justify-center transition-opacity duration-700"
+          style={{ opacity: endReached ? 1 : 0 }}
+        >
+          <div className="text-center">
+            <p
+              className="mb-4 text-[11px] uppercase tracking-[0.5em] text-foreground/60"
+              style={{ fontWeight: 400 }}
+            >
+              Introducing
+            </p>
+            <h2
+              className="text-6xl tracking-[0.05em] text-foreground/90 sm:text-8xl"
+              style={{ fontWeight: 300, textShadow: "0 2px 30px hsl(var(--background) / 0.6)" }}
+            >
+              Grain<span className="text-primary/90">OS</span>
+            </h2>
+            <p
+              className="mt-4 text-sm tracking-[0.2em] text-muted-foreground"
+              style={{ fontWeight: 300 }}
+            >
+              The storage co-pilot · Continue scrolling
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+export default ScrollHero;
