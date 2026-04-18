@@ -1,11 +1,12 @@
 import { Link, useLocation } from "react-router-dom";
-import { Wheat, Bell } from "lucide-react";
+import { Wheat, Bell, Menu, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { getUnreadCount } from "@/lib/api";
 
 const Navbar = () => {
   const { pathname } = useLocation();
   const [count, setCount] = useState(0);
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -25,6 +26,11 @@ const Navbar = () => {
     };
   }, []);
 
+  // Close mobile menu on route change
+  useEffect(() => {
+    setOpen(false);
+  }, [pathname]);
+
   const links = [
     { to: "/", label: "Home" },
     { to: "/dashboard", label: "Dashboard" },
@@ -34,17 +40,18 @@ const Navbar = () => {
 
   return (
     <nav className="sticky top-0 z-50 border-b border-border/60 bg-background/80 backdrop-blur-md">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
-        <Link to="/" className="flex items-center gap-2.5">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg gradient-primary shadow-3d-sm">
-            <Wheat className="h-5 w-5 text-primary-foreground" />
+      <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-3 sm:h-16 sm:px-6">
+        <Link to="/" className="flex items-center gap-2 sm:gap-2.5 min-w-0">
+          <div className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-lg gradient-primary shadow-3d-sm shrink-0">
+            <Wheat className="h-4 w-4 sm:h-5 sm:w-5 text-primary-foreground" />
           </div>
-          <span className="text-base font-400 tracking-tight text-foreground" style={{ fontWeight: 500 }}>
+          <span className="text-sm sm:text-base tracking-tight text-foreground truncate" style={{ fontWeight: 500 }}>
             Smart Sell Advisor
           </span>
         </Link>
 
-        <div className="flex items-center gap-1">
+        {/* Desktop links */}
+        <div className="hidden md:flex items-center gap-1">
           {links.map((l) => (
             <Link
               key={l.to}
@@ -75,7 +82,55 @@ const Navbar = () => {
             )}
           </Link>
         </div>
+
+        {/* Mobile: bell + hamburger */}
+        <div className="flex md:hidden items-center gap-1.5">
+          <Link
+            to="/notifications"
+            className={`relative flex h-9 w-9 items-center justify-center rounded-lg border bg-card ${
+              pathname === "/notifications" ? "border-primary/40 bg-primary/5" : "border-border"
+            }`}
+            aria-label="Notifications"
+          >
+            <Bell className={`h-4 w-4 ${pathname === "/notifications" ? "text-primary" : "text-muted-foreground"}`} />
+            {count > 0 && (
+              <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[9px] font-semibold text-destructive-foreground">
+                {count}
+              </span>
+            )}
+          </Link>
+          <button
+            onClick={() => setOpen((v) => !v)}
+            className="flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-card text-foreground"
+            aria-label="Toggle menu"
+            aria-expanded={open}
+          >
+            {open ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+          </button>
+        </div>
       </div>
+
+      {/* Mobile dropdown */}
+      {open && (
+        <div className="md:hidden border-t border-border/60 bg-background/95 backdrop-blur-md">
+          <div className="mx-auto max-w-7xl px-3 py-2 flex flex-col gap-1">
+            {links.map((l) => (
+              <Link
+                key={l.to}
+                to={l.to}
+                className={`rounded-md px-3 py-2.5 text-sm transition-all ${
+                  pathname === l.to
+                    ? "bg-primary/10 text-primary"
+                    : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                }`}
+                style={{ fontWeight: 400 }}
+              >
+                {l.label}
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
     </nav>
   );
 };

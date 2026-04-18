@@ -150,24 +150,24 @@ const Dashboard = () => {
     <div className="min-h-screen bg-background grain-texture">
       <Navbar />
 
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
+      <div className="mx-auto max-w-7xl px-3 py-6 sm:px-6 sm:py-8">
         {/* Header */}
-        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div className="mb-6 sm:mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="mb-2 text-xs uppercase tracking-[0.2em] text-primary" style={{ fontWeight: 500 }}>Live Monitoring</p>
-            <h1 className="text-4xl tracking-tight text-foreground sm:text-5xl" style={{ fontWeight: 300 }}>
+            <p className="mb-2 text-[10px] sm:text-xs uppercase tracking-[0.2em] text-primary" style={{ fontWeight: 500 }}>Live Monitoring</p>
+            <h1 className="text-3xl sm:text-4xl md:text-5xl tracking-tight text-foreground" style={{ fontWeight: 300 }}>
               Wheat Storage <span style={{ fontWeight: 500 }}>Dashboard</span>
             </h1>
-            <p className="mt-2 text-sm text-muted-foreground" style={{ fontWeight: 300 }}>
+            <p className="mt-2 text-xs sm:text-sm text-muted-foreground" style={{ fontWeight: 300 }}>
               Real-time monitoring and AI-powered selling recommendations
             </p>
           </div>
-          <div className="flex gap-2">
-            <button onClick={handleRefresh} disabled={loading} className="btn-3d btn-3d-secondary text-sm disabled:opacity-60">
+          <div className="flex flex-wrap gap-2">
+            <button onClick={handleRefresh} disabled={loading} className="btn-3d btn-3d-secondary text-xs sm:text-sm disabled:opacity-60 flex-1 sm:flex-none min-w-0">
               {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
               Refresh
             </button>
-            <button onClick={() => setModalOpen(true)} className="btn-3d text-sm">
+            <button onClick={() => setModalOpen(true)} className="btn-3d text-xs sm:text-sm flex-1 sm:flex-none min-w-0">
               <Edit3 className="h-4 w-4" />
               Manual Input
             </button>
@@ -186,7 +186,7 @@ const Dashboard = () => {
             <div className="space-y-5">
               {/* Current Conditions */}
               <Section title="Current Conditions" icon={Thermometer}>
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-3 gap-2 sm:gap-3">
                   <StatCard label="Temperature" value={data.temperature?.toFixed(1)} unit="°C" icon={Thermometer} />
                   <StatCard label="Humidity" value={data.humidity?.toFixed(1)} unit="%" icon={Droplets} color="text-secondary" />
                   <StatCard label="Gas" value={data.co2?.toFixed(0)} unit="PPM" icon={Wind} color="text-warning" />
@@ -365,12 +365,12 @@ const Dashboard = () => {
 
 /* Helpers */
 const Section = ({ title, icon: Icon, children }: { title: string; icon: typeof Thermometer; children: React.ReactNode }) => (
-  <div className="rounded-xl border bg-card p-6 shadow-3d">
-    <div className="mb-5 flex items-center gap-2.5">
+  <div className="rounded-xl border bg-card p-4 sm:p-6 shadow-3d">
+    <div className="mb-4 sm:mb-5 flex items-center gap-2.5">
       <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary shadow-3d-sm">
         <Icon className="h-4 w-4" strokeWidth={1.5} />
       </div>
-      <h2 className="text-sm uppercase tracking-wider text-foreground" style={{ fontWeight: 500 }}>{title}</h2>
+      <h2 className="text-xs sm:text-sm uppercase tracking-wider text-foreground" style={{ fontWeight: 500 }}>{title}</h2>
     </div>
     {children}
   </div>

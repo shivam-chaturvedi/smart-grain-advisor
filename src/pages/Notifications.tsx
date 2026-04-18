@@ -72,26 +72,26 @@ const Notifications = () => {
   return (
     <div className="min-h-screen bg-background grain-texture">
       <Navbar />
-      <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6">
-        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <p className="mb-2 text-xs uppercase tracking-[0.2em] text-primary" style={{ fontWeight: 500 }}>Inbox</p>
-            <h1 className="flex items-center gap-3 text-4xl tracking-tight text-foreground" style={{ fontWeight: 300 }}>
-              <span className="flex h-12 w-12 items-center justify-center rounded-xl gradient-primary text-primary-foreground shadow-3d">
-                <Bell className="h-5 w-5" strokeWidth={1.5} />
+      <div className="mx-auto max-w-4xl px-3 py-6 sm:px-6 sm:py-10">
+        <div className="mb-6 sm:mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div className="min-w-0">
+            <p className="mb-2 text-[10px] sm:text-xs uppercase tracking-[0.2em] text-primary" style={{ fontWeight: 500 }}>Inbox</p>
+            <h1 className="flex items-center gap-2.5 sm:gap-3 text-2xl sm:text-4xl tracking-tight text-foreground" style={{ fontWeight: 300 }}>
+              <span className="flex h-9 w-9 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-xl gradient-primary text-primary-foreground shadow-3d">
+                <Bell className="h-4 w-4 sm:h-5 sm:w-5" strokeWidth={1.5} />
               </span>
               Notifications
             </h1>
-            <p className="mt-2 text-sm text-muted-foreground" style={{ fontWeight: 300 }}>
+            <p className="mt-2 text-xs sm:text-sm text-muted-foreground" style={{ fontWeight: 300 }}>
               {unread > 0 ? `${unread} unread` : "All caught up"} · Alerts for SELL signals, AI updates and sensor changes
             </p>
           </div>
-          <div className="flex gap-2">
-            <button onClick={handleMarkAllRead} className="btn-3d btn-3d-secondary text-sm">
+          <div className="flex flex-wrap gap-2">
+            <button onClick={handleMarkAllRead} className="btn-3d btn-3d-secondary text-xs sm:text-sm flex-1 sm:flex-none">
               <CheckCheck className="h-4 w-4" />
               Mark all read
             </button>
-            <button onClick={handleClear} className="btn-3d btn-3d-secondary text-sm">
+            <button onClick={handleClear} className="btn-3d btn-3d-secondary text-xs sm:text-sm flex-1 sm:flex-none">
               <Trash2 className="h-4 w-4" />
               Clear
             </button>
@@ -116,12 +116,12 @@ const Notifications = () => {
               return (
                 <div
                   key={n.id}
-                  className={`group flex items-start gap-4 rounded-xl border bg-card p-5 shadow-3d shadow-3d-hover ${
+                  className={`group flex items-start gap-3 sm:gap-4 rounded-xl border bg-card p-4 sm:p-5 shadow-3d shadow-3d-hover ${
                     !n.read ? "border-primary/30 bg-gradient-to-r from-primary/5 to-transparent" : ""
                   }`}
                 >
-                  <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-lg ${meta.bg} ${meta.color} shadow-3d-sm`}>
-                    <I className="h-5 w-5" strokeWidth={1.5} />
+                  <div className={`flex h-9 w-9 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded-lg ${meta.bg} ${meta.color} shadow-3d-sm`}>
+                    <I className="h-4 w-4 sm:h-5 sm:w-5" strokeWidth={1.5} />
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="mb-1 flex items-center gap-2">
@@ -130,9 +130,9 @@ const Notifications = () => {
                       </span>
                       {!n.read && <span className="h-1.5 w-1.5 rounded-full bg-primary shadow-[0_0_6px_hsl(var(--primary))]" />}
                     </div>
-                    <h3 className="text-base text-foreground" style={{ fontWeight: 500 }}>{n.title}</h3>
-                    <p className="mt-1 text-sm leading-relaxed text-muted-foreground" style={{ fontWeight: 300 }}>{n.message}</p>
-                    <p className="mt-2 text-xs text-muted-foreground/70">{n.timestamp}</p>
+                    <h3 className="text-sm sm:text-base text-foreground break-words" style={{ fontWeight: 500 }}>{n.title}</h3>
+                    <p className="mt-1 text-xs sm:text-sm leading-relaxed text-muted-foreground break-words" style={{ fontWeight: 300 }}>{n.message}</p>
+                    <p className="mt-2 text-[11px] sm:text-xs text-muted-foreground/70">{n.timestamp}</p>
                   </div>
                 </div>
               );

@@ -117,8 +117,11 @@ const ScrollHero = ({ onQuickAnalysis }: ScrollHeroProps) => {
   const loadProgress = Math.round((loaded / FRAME_COUNT) * 100);
 
   return (
-    // Tall container = scroll length. ~300vh gives a comfortable scroll feel.
-    <section ref={containerRef} className="relative" style={{ height: "320vh" }}>
+    // Tall container = scroll length. Shorter on mobile for a snappier feel.
+    <section
+      ref={containerRef}
+      className="relative h-[220vh] sm:h-[280vh] lg:h-[320vh]"
+    >
       {/* Sticky viewport */}
       <div className="sticky top-0 h-screen w-full overflow-hidden bg-background">
         {/* Canvas */}
@@ -145,16 +148,16 @@ const ScrollHero = ({ onQuickAnalysis }: ScrollHeroProps) => {
           className="absolute inset-0 flex items-center justify-center px-4 transition-opacity duration-500"
           style={{ opacity: endReached ? 0 : 1, pointerEvents: endReached ? "none" : "auto" }}
         >
-          <div className="relative mx-auto max-w-5xl text-center">
+          <div className="relative mx-auto max-w-5xl w-full text-center">
             <div
-              className="mb-6 inline-flex items-center gap-2 rounded-full border bg-card/70 px-4 py-1.5 text-xs text-muted-foreground shadow-3d-sm backdrop-blur-md"
+              className="mb-4 sm:mb-6 inline-flex max-w-full items-center gap-2 rounded-full border bg-card/70 px-3 py-1.5 text-[10px] sm:text-xs text-muted-foreground shadow-3d-sm backdrop-blur-md"
               style={{ fontWeight: 500 }}
             >
-              <Zap className="h-3 w-3 text-secondary" />
-              AI-Powered Agriculture · IoT Sensors · Market Intelligence
+              <Zap className="h-3 w-3 shrink-0 text-secondary" />
+              <span className="truncate">AI · IoT Sensors · Market Intelligence</span>
             </div>
             <h1
-              className="mb-6 text-5xl tracking-tight text-foreground sm:text-7xl drop-shadow-sm"
+              className="mb-4 sm:mb-6 text-3xl sm:text-5xl md:text-6xl lg:text-7xl tracking-tight text-foreground drop-shadow-sm"
               style={{ fontWeight: 300 }}
             >
               Smart Sell{" "}
@@ -166,24 +169,24 @@ const ScrollHero = ({ onQuickAnalysis }: ScrollHeroProps) => {
               </span>
             </h1>
             <p
-              className="mx-auto mb-10 max-w-2xl text-lg leading-relaxed text-green-300 sm:text-xl drop-shadow-sm"
+              className="mx-auto mb-6 sm:mb-10 max-w-2xl text-sm sm:text-lg md:text-xl leading-relaxed text-green-300 drop-shadow-sm px-2"
               style={{ fontWeight: 300 }}
             >
               AI-powered wheat storage optimization and market timing system.
               Make data-driven decisions to maximize your harvest value.
             </p>
-            <div className="flex flex-wrap items-center justify-center gap-4">
-              <Link to="/dashboard" className="btn-3d text-base">
+            <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center justify-center gap-3 sm:gap-4 px-4 sm:px-0">
+              <Link to="/dashboard" className="btn-3d text-sm sm:text-base">
                 Go to Dashboard
                 <ArrowRight className="h-4 w-4" />
               </Link>
-              <button onClick={onQuickAnalysis} className="btn-3d btn-3d-secondary text-base">
+              <button onClick={onQuickAnalysis} className="btn-3d btn-3d-secondary text-sm sm:text-base">
                 Quick Analysis
               </button>
             </div>
 
             {/* Stats */}
-            <div className="mt-14 grid grid-cols-2 gap-4 sm:grid-cols-4">
+            <div className="mt-8 sm:mt-14 grid grid-cols-2 gap-2.5 sm:gap-4 sm:grid-cols-4 px-2 sm:px-0">
               {[
                 { v: "30%", l: "Loss Reduction" },
                 { v: "15-20%", l: "Profit Increase" },
@@ -192,11 +195,11 @@ const ScrollHero = ({ onQuickAnalysis }: ScrollHeroProps) => {
               ].map((s) => (
                 <div
                   key={s.l}
-                  className="rounded-xl border bg-card/70 p-5 shadow-3d backdrop-blur-md"
+                  className="rounded-xl border bg-card/70 p-3 sm:p-5 shadow-3d backdrop-blur-md"
                 >
-                  <p className="stat-number text-3xl">{s.v}</p>
+                  <p className="stat-number text-xl sm:text-3xl">{s.v}</p>
                   <p
-                    className="mt-1 text-xs uppercase tracking-wider text-muted-foreground"
+                    className="mt-1 text-[9px] sm:text-xs uppercase tracking-wider text-muted-foreground"
                     style={{ fontWeight: 500 }}
                   >
                     {s.l}
@@ -206,7 +209,7 @@ const ScrollHero = ({ onQuickAnalysis }: ScrollHeroProps) => {
             </div>
 
             <p
-              className="mt-10 text-[11px] uppercase tracking-[0.3em] text-muted-foreground/70"
+              className="mt-6 sm:mt-10 text-[10px] sm:text-[11px] uppercase tracking-[0.3em] text-muted-foreground/70"
               style={{ fontWeight: 400 }}
             >
               ↓ Scroll to explore
@@ -219,21 +222,21 @@ const ScrollHero = ({ onQuickAnalysis }: ScrollHeroProps) => {
           className="pointer-events-none absolute inset-0 flex items-center justify-center transition-opacity duration-700"
           style={{ opacity: endReached ? 1 : 0 }}
         >
-          <div className="text-center">
+          <div className="text-center px-4">
             <p
-              className="mb-4 text-[11px] uppercase tracking-[0.5em] text-foreground/60"
+              className="mb-3 sm:mb-4 text-[10px] sm:text-[11px] uppercase tracking-[0.4em] sm:tracking-[0.5em] text-foreground/60"
               style={{ fontWeight: 400 }}
             >
               Introducing
             </p>
             <h2
-              className="text-6xl tracking-[0.05em] text-foreground/90 sm:text-8xl"
+              className="text-4xl sm:text-6xl md:text-8xl tracking-[0.05em] text-foreground/90"
               style={{ fontWeight: 300, textShadow: "0 2px 30px hsl(var(--background) / 0.6)" }}
             >
               Grain<span className="text-primary/90">OS</span>
             </h2>
             <p
-              className="mt-4 text-sm tracking-[0.2em] text-muted-foreground"
+              className="mt-3 sm:mt-4 text-xs sm:text-sm tracking-[0.15em] sm:tracking-[0.2em] text-muted-foreground"
               style={{ fontWeight: 300 }}
             >
               The storage co-pilot · Continue scrolling
