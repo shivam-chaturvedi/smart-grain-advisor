@@ -93,52 +93,81 @@ const History = () => {
             <p className="text-sm text-muted-foreground">No history data available yet.</p>
           </div>
         ) : (
-          <div className="overflow-hidden rounded-lg border bg-card card-shadow">
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b bg-muted/40">
-                    <th className="px-4 py-3 text-left font-medium text-muted-foreground">#</th>
-                    <th className="px-4 py-3 text-left font-medium text-muted-foreground">Timestamp</th>
-                    <th className="px-4 py-3 text-left font-medium text-muted-foreground">Device</th>
-                    <th className="px-4 py-3 text-right font-medium text-muted-foreground">Temp (°C)</th>
-                    <th className="px-4 py-3 text-right font-medium text-muted-foreground">Humidity (%)</th>
-                    <th className="px-4 py-3 text-right font-medium text-muted-foreground">Gas (PPM)</th>
-                    <th className="px-4 py-3 text-right font-medium text-muted-foreground">Gas Raw</th>
-                    <th className="px-4 py-3 text-right font-medium text-muted-foreground">Qty (q)</th>
-                    <th className="px-4 py-3 text-center font-medium text-muted-foreground">Risk</th>
-                    <th className="px-4 py-3 text-right font-medium text-muted-foreground">Score</th>
-                    <th className="px-4 py-3 text-center font-medium text-muted-foreground">Source</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {data.map((entry, i) => (
-                    <tr key={entry.id} className={`border-b last:border-0 transition-colors hover:bg-muted/20 ${i % 2 === 0 ? "" : "bg-muted/10"}`}>
-                      <td className="px-4 py-2.5 text-muted-foreground">{entry.id}</td>
-                      <td className="px-4 py-2.5 font-mono text-xs text-foreground">{entry.timestamp}</td>
-                      <td className="px-4 py-2.5 font-mono text-xs text-muted-foreground">{entry.device_id ?? "—"}</td>
-                      <td className="px-4 py-2.5 text-right tabular-nums text-foreground">{entry.temperature.toFixed(1)}</td>
-                      <td className="px-4 py-2.5 text-right tabular-nums text-foreground">{entry.humidity.toFixed(1)}</td>
-                      <td className="px-4 py-2.5 text-right tabular-nums text-foreground">{Number(entry.gas_ppm ?? entry.co2).toFixed(0)}</td>
-                      <td className="px-4 py-2.5 text-right tabular-nums text-muted-foreground">{entry.gas_raw ?? "—"}</td>
-                      <td className="px-4 py-2.5 text-right tabular-nums text-foreground">{entry.quantity}</td>
-                      <td className="px-4 py-2.5 text-center">
-                        <span className={`inline-block rounded px-2 py-0.5 text-[10px] font-semibold uppercase ${riskColor(entry.risk_level)}`}>
-                          {entry.risk_level}
-                        </span>
-                      </td>
-                      <td className="px-4 py-2.5 text-right tabular-nums text-foreground">{entry.risk_score.toFixed(1)}</td>
-                      <td className="px-4 py-2.5 text-center">
-                        <span className={`inline-block rounded px-2 py-0.5 text-[10px] font-medium ${entry.source === "sensor" ? "bg-primary/10 text-primary" : "bg-secondary/10 text-secondary"}`}>
-                          {entry.source}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+          <>
+            {/* Mobile card list */}
+            <div className="grid gap-3 sm:hidden">
+              {data.map((entry) => (
+                <div key={entry.id} className="rounded-xl border bg-card p-4 shadow-3d-sm">
+                  <div className="flex items-center justify-between gap-2 mb-3">
+                    <span className="font-mono text-[11px] text-muted-foreground truncate">{entry.timestamp}</span>
+                    <span className={`shrink-0 inline-block rounded px-2 py-0.5 text-[10px] font-semibold uppercase ${riskColor(entry.risk_level)}`}>
+                      {entry.risk_level}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2 mb-3">
+                    <MobileMini label="Temp" value={`${entry.temperature.toFixed(1)}°C`} />
+                    <MobileMini label="Humidity" value={`${entry.humidity.toFixed(1)}%`} />
+                    <MobileMini label="Gas" value={`${Number(entry.gas_ppm ?? entry.co2).toFixed(0)}`} />
+                  </div>
+                  <div className="flex items-center justify-between gap-2 text-[11px] text-muted-foreground">
+                    <span>Qty: <span className="text-foreground tabular-nums">{entry.quantity}</span></span>
+                    <span>Score: <span className="text-foreground tabular-nums">{entry.risk_score.toFixed(1)}</span></span>
+                    <span className={`inline-block rounded px-2 py-0.5 text-[10px] font-medium ${entry.source === "sensor" ? "bg-primary/10 text-primary" : "bg-secondary/10 text-secondary"}`}>
+                      {entry.source}
+                    </span>
+                  </div>
+                </div>
+              ))}
             </div>
-          </div>
+
+            {/* Desktop table */}
+            <div className="hidden sm:block overflow-hidden rounded-lg border bg-card card-shadow">
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b bg-muted/40">
+                      <th className="px-4 py-3 text-left font-medium text-muted-foreground">#</th>
+                      <th className="px-4 py-3 text-left font-medium text-muted-foreground">Timestamp</th>
+                      <th className="px-4 py-3 text-left font-medium text-muted-foreground">Device</th>
+                      <th className="px-4 py-3 text-right font-medium text-muted-foreground">Temp (°C)</th>
+                      <th className="px-4 py-3 text-right font-medium text-muted-foreground">Humidity (%)</th>
+                      <th className="px-4 py-3 text-right font-medium text-muted-foreground">Gas (PPM)</th>
+                      <th className="px-4 py-3 text-right font-medium text-muted-foreground">Gas Raw</th>
+                      <th className="px-4 py-3 text-right font-medium text-muted-foreground">Qty (q)</th>
+                      <th className="px-4 py-3 text-center font-medium text-muted-foreground">Risk</th>
+                      <th className="px-4 py-3 text-right font-medium text-muted-foreground">Score</th>
+                      <th className="px-4 py-3 text-center font-medium text-muted-foreground">Source</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {data.map((entry, i) => (
+                      <tr key={entry.id} className={`border-b last:border-0 transition-colors hover:bg-muted/20 ${i % 2 === 0 ? "" : "bg-muted/10"}`}>
+                        <td className="px-4 py-2.5 text-muted-foreground">{entry.id}</td>
+                        <td className="px-4 py-2.5 font-mono text-xs text-foreground whitespace-nowrap">{entry.timestamp}</td>
+                        <td className="px-4 py-2.5 font-mono text-xs text-muted-foreground">{entry.device_id ?? "—"}</td>
+                        <td className="px-4 py-2.5 text-right tabular-nums text-foreground">{entry.temperature.toFixed(1)}</td>
+                        <td className="px-4 py-2.5 text-right tabular-nums text-foreground">{entry.humidity.toFixed(1)}</td>
+                        <td className="px-4 py-2.5 text-right tabular-nums text-foreground">{Number(entry.gas_ppm ?? entry.co2).toFixed(0)}</td>
+                        <td className="px-4 py-2.5 text-right tabular-nums text-muted-foreground">{entry.gas_raw ?? "—"}</td>
+                        <td className="px-4 py-2.5 text-right tabular-nums text-foreground">{entry.quantity}</td>
+                        <td className="px-4 py-2.5 text-center">
+                          <span className={`inline-block rounded px-2 py-0.5 text-[10px] font-semibold uppercase ${riskColor(entry.risk_level)}`}>
+                            {entry.risk_level}
+                          </span>
+                        </td>
+                        <td className="px-4 py-2.5 text-right tabular-nums text-foreground">{entry.risk_score.toFixed(1)}</td>
+                        <td className="px-4 py-2.5 text-center">
+                          <span className={`inline-block rounded px-2 py-0.5 text-[10px] font-medium ${entry.source === "sensor" ? "bg-primary/10 text-primary" : "bg-secondary/10 text-secondary"}`}>
+                            {entry.source}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </>
         )}
       </div>
     </div>
