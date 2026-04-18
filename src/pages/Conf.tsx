@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { getSensorConfig, registerSensorConfig, type SensorConfig } from "@/lib/api";
+import BackendUnavailableBanner from "@/components/BackendUnavailableBanner";
+import { BackendUnavailableError, getSensorConfig, registerSensorConfig, type SensorConfig } from "@/lib/api";
 
 const DEVICE_ID = "001";
 const SENSOR_NAME = "Grain OS";
@@ -17,6 +18,7 @@ const Conf = () => {
   const [saving, setSaving] = useState(false);
   const [config, setConfig] = useState<SensorConfig | null>(null);
   const [quantity, setQuantity] = useState<string>("");
+  const [backendDown, setBackendDown] = useState(false);
 
   useEffect(() => {
     const run = async () => {
@@ -25,8 +27,13 @@ const Conf = () => {
         const row = await getSensorConfig(DEVICE_ID);
         setConfig(row);
         setQuantity(row ? String(row.wheat_quantity) : "");
+        setBackendDown(false);
       } catch (e) {
-        toast.error(e instanceof Error ? e.message : "Failed to load configuration");
+        if (e instanceof BackendUnavailableError) {
+          setBackendDown(true);
+        } else {
+          toast.error(e instanceof Error ? e.message : "Failed to load configuration");
+        }
       } finally {
         setLoading(false);
       }
@@ -53,9 +60,14 @@ const Conf = () => {
       });
       setConfig(saved);
       setQuantity(String(saved.wheat_quantity));
+      setBackendDown(false);
       toast.success("Configuration saved");
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to save");
+      if (err instanceof BackendUnavailableError) {
+        setBackendDown(true);
+      } else {
+        toast.error(err instanceof Error ? err.message : "Failed to save");
+      }
     } finally {
       setSaving(false);
     }
@@ -77,6 +89,9 @@ const Conf = () => {
           </p>
         </div>
 
+        {backendDown ? <BackendUnavailableBanner className="mb-6" /> : null}
+
+        {backendDown ? null : (
         <div className="rounded-2xl border bg-card p-7 shadow-3d">
           {loading ? (
             <p className="text-sm text-muted-foreground">Loading…</p>
@@ -128,10 +143,10 @@ const Conf = () => {
             </form>
           )}
         </div>
+        )}
       </div>
     </div>
   );
 };
 
 export default Conf;
-

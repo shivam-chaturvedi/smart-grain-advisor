@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { Bell, CheckCheck, Trash2, AlertTriangle, TrendingUp, Activity, Info } from "lucide-react";
 import Navbar from "@/components/Navbar";
+import BackendUnavailableBanner from "@/components/BackendUnavailableBanner";
 import {
   type AppNotification,
+  BackendUnavailableError,
   getNotifications,
   markAllNotificationsRead,
   clearAllNotifications,
@@ -18,13 +20,19 @@ const typeMeta: Record<AppNotification["type"], { icon: typeof Bell; bg: string;
 
 const Notifications = () => {
   const [items, setItems] = useState<AppNotification[]>([]);
+  const [backendDown, setBackendDown] = useState(false);
 
   useEffect(() => {
     const refresh = async () => {
       try {
         setItems(await getNotifications(50));
-      } catch {
-        toast.error("Failed to load notifications. Start the backend on http://localhost:5050");
+        setBackendDown(false);
+      } catch (e) {
+        if (e instanceof BackendUnavailableError) {
+          setBackendDown(true);
+        } else {
+          toast.error(e instanceof Error ? e.message : "Failed to load notifications");
+        }
         setItems([]);
       }
     };
@@ -37,8 +45,13 @@ const Notifications = () => {
     try {
       await markAllNotificationsRead();
       setItems(await getNotifications(50));
-    } catch {
-      toast.error("Failed to mark notifications read");
+      setBackendDown(false);
+    } catch (e) {
+      if (e instanceof BackendUnavailableError) {
+        setBackendDown(true);
+      } else {
+        toast.error("Failed to mark notifications read");
+      }
     }
   };
 
@@ -46,8 +59,13 @@ const Notifications = () => {
     try {
       await clearAllNotifications();
       setItems([]);
-    } catch {
-      toast.error("Failed to clear notifications");
+      setBackendDown(false);
+    } catch (e) {
+      if (e instanceof BackendUnavailableError) {
+        setBackendDown(true);
+      } else {
+        toast.error("Failed to clear notifications");
+      }
     }
   };
 
@@ -80,7 +98,9 @@ const Notifications = () => {
           </div>
         </div>
 
-        {items.length === 0 ? (
+        {backendDown ? <BackendUnavailableBanner className="mb-6" /> : null}
+
+        {backendDown ? null : items.length === 0 ? (
           <div className="rounded-2xl border bg-card p-16 text-center shadow-3d">
             <Bell className="mx-auto mb-4 h-10 w-10 text-muted-foreground" strokeWidth={1} />
             <p className="text-base text-foreground" style={{ fontWeight: 400 }}>No notifications yet</p>

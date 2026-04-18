@@ -22,7 +22,9 @@ import ConfidenceCircle from "@/components/ConfidenceCircle";
 import RecommendationPanel from "@/components/RecommendationPanel";
 import PriceChart from "@/components/PriceChart";
 import ManualInputModal from "@/components/ManualInputModal";
+import BackendUnavailableBanner from "@/components/BackendUnavailableBanner";
 import {
+  BackendUnavailableError,
   getCurrentStatus,
   submitManualInput,
   getPriceForecast,
@@ -40,6 +42,7 @@ const Dashboard = () => {
   const [forecast, setForecast] = useState<PriceForecast | null>(null);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
+  const [backendDown, setBackendDown] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval>>();
 
   const fetchData = useCallback(async () => {
@@ -62,7 +65,8 @@ const Dashboard = () => {
         if (!status) {
           setData(null);
           setForecast(await getPriceForecast());
-          return;
+          setBackendDown(false);
+          return true;
         }
         result = status;
       }
@@ -70,10 +74,17 @@ const Dashboard = () => {
 
       const fc = await getPriceForecast();
       setForecast(fc);
+      setBackendDown(false);
+      return true;
     } catch (e) {
-      toast.error("Backend unavailable. Start the backend on http://localhost:5050");
+      if (e instanceof BackendUnavailableError) {
+        setBackendDown(true);
+      } else {
+        toast.error(e instanceof Error ? e.message : "Failed to load dashboard data");
+      }
       setData(null);
       setForecast(null);
+      return false;
     } finally {
       setLoading(false);
     }
@@ -87,8 +98,8 @@ const Dashboard = () => {
 
   const handleRefresh = async () => {
     setLoading(true);
-    await fetchData();
-    toast.success("Data refreshed");
+    const ok = await fetchData();
+    if (ok) toast.success("Data refreshed");
   };
 
   const handleManualSubmit = async (sensor: SensorData) => {
@@ -107,9 +118,14 @@ const Dashboard = () => {
       setData(result);
       const fc = await getPriceForecast();
       setForecast(fc);
+      setBackendDown(false);
       toast.success("Analysis updated");
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Submission failed");
+      if (e instanceof BackendUnavailableError) {
+        setBackendDown(true);
+      } else {
+        toast.error(e instanceof Error ? e.message : "Submission failed");
+      }
     } finally {
       setLoading(false);
     }
@@ -119,9 +135,14 @@ const Dashboard = () => {
     try {
       await resetData();
       toast.info("Data reset");
-      await fetchData();
-    } catch {
-      toast.error("Reset failed");
+      const ok = await fetchData();
+      if (ok) setBackendDown(false);
+    } catch (e) {
+      if (e instanceof BackendUnavailableError) {
+        setBackendDown(true);
+      } else {
+        toast.error("Reset failed");
+      }
     }
   };
 
@@ -153,7 +174,9 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {loading && !data ? (
+        {backendDown ? <BackendUnavailableBanner className="mb-6" /> : null}
+
+        {backendDown ? null : loading && !data ? (
           <div className="flex h-64 items-center justify-center">
             <Loader2 className="h-6 w-6 animate-spin text-primary" />
           </div>
@@ -166,7 +189,7 @@ const Dashboard = () => {
                 <div className="grid grid-cols-3 gap-3">
                   <StatCard label="Temperature" value={data.temperature?.toFixed(1)} unit="°C" icon={Thermometer} />
                   <StatCard label="Humidity" value={data.humidity?.toFixed(1)} unit="%" icon={Droplets} color="text-secondary" />
-                  <StatCard label="CO₂" value={data.co2?.toFixed(0)} unit="PPM" icon={Wind} color="text-warning" />
+                  <StatCard label="Gas" value={data.co2?.toFixed(0)} unit="PPM" icon={Wind} color="text-warning" />
                 </div>
                 <div className="mt-4">
                   <RiskMeter level={data.risk_level} score={data.risk_score} lastUpdated={data.last_updated} />

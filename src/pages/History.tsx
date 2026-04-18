@@ -2,7 +2,8 @@ import { useCallback, useEffect, useState } from "react";
 import { History as HistoryIcon, Thermometer, Droplets, Wind, AlertTriangle, Loader2, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import Navbar from "@/components/Navbar";
-import { getSensorHistory, type SensorHistoryEntry } from "@/lib/api";
+import BackendUnavailableBanner from "@/components/BackendUnavailableBanner";
+import { BackendUnavailableError, getSensorHistory, type SensorHistoryEntry } from "@/lib/api";
 
 const riskColor = (level: string) => {
   switch (level.toUpperCase()) {
@@ -17,14 +18,20 @@ const riskColor = (level: string) => {
 const History = () => {
   const [data, setData] = useState<SensorHistoryEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [backendDown, setBackendDown] = useState(false);
 
   const fetchHistory = useCallback(async () => {
     setLoading(true);
     try {
       const json = await getSensorHistory(200);
       setData(json);
-    } catch {
-      toast.error("Failed to load history. Start the backend on http://localhost:5050");
+      setBackendDown(false);
+    } catch (e) {
+      if (e instanceof BackendUnavailableError) {
+        setBackendDown(true);
+      } else {
+        toast.error(e instanceof Error ? e.message : "Failed to load history");
+      }
       setData([]);
     } finally {
       setLoading(false);
@@ -64,18 +71,20 @@ const History = () => {
           </button>
         </div>
 
+        {backendDown ? <BackendUnavailableBanner className="mb-6" /> : null}
+
         {/* Summary Cards */}
-        {stats && (
+        {!backendDown && stats && (
           <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
             <SummaryCard icon={Thermometer} label="Avg Temp" value={`${stats.avgTemp}°C`} />
             <SummaryCard icon={Droplets} label="Avg Humidity" value={`${stats.avgHum}%`} />
-            <SummaryCard icon={Wind} label="Avg CO₂" value={`${stats.avgCo2} PPM`} />
+            <SummaryCard icon={Wind} label="Avg Gas (PPM)" value={`${stats.avgCo2} PPM`} />
             <SummaryCard icon={AlertTriangle} label="High Risk Events" value={String(stats.highRisk)} accent />
           </div>
         )}
 
         {/* Table */}
-        {loading ? (
+        {backendDown ? null : loading ? (
           <div className="flex h-64 items-center justify-center">
             <Loader2 className="h-6 w-6 animate-spin text-primary" />
           </div>
@@ -91,9 +100,11 @@ const History = () => {
                   <tr className="border-b bg-muted/40">
                     <th className="px-4 py-3 text-left font-medium text-muted-foreground">#</th>
                     <th className="px-4 py-3 text-left font-medium text-muted-foreground">Timestamp</th>
+                    <th className="px-4 py-3 text-left font-medium text-muted-foreground">Device</th>
                     <th className="px-4 py-3 text-right font-medium text-muted-foreground">Temp (°C)</th>
                     <th className="px-4 py-3 text-right font-medium text-muted-foreground">Humidity (%)</th>
-                    <th className="px-4 py-3 text-right font-medium text-muted-foreground">CO₂ (PPM)</th>
+                    <th className="px-4 py-3 text-right font-medium text-muted-foreground">Gas (PPM)</th>
+                    <th className="px-4 py-3 text-right font-medium text-muted-foreground">Gas Raw</th>
                     <th className="px-4 py-3 text-right font-medium text-muted-foreground">Qty (q)</th>
                     <th className="px-4 py-3 text-center font-medium text-muted-foreground">Risk</th>
                     <th className="px-4 py-3 text-right font-medium text-muted-foreground">Score</th>
@@ -105,9 +116,11 @@ const History = () => {
                     <tr key={entry.id} className={`border-b last:border-0 transition-colors hover:bg-muted/20 ${i % 2 === 0 ? "" : "bg-muted/10"}`}>
                       <td className="px-4 py-2.5 text-muted-foreground">{entry.id}</td>
                       <td className="px-4 py-2.5 font-mono text-xs text-foreground">{entry.timestamp}</td>
+                      <td className="px-4 py-2.5 font-mono text-xs text-muted-foreground">{entry.device_id ?? "—"}</td>
                       <td className="px-4 py-2.5 text-right tabular-nums text-foreground">{entry.temperature.toFixed(1)}</td>
                       <td className="px-4 py-2.5 text-right tabular-nums text-foreground">{entry.humidity.toFixed(1)}</td>
-                      <td className="px-4 py-2.5 text-right tabular-nums text-foreground">{entry.co2}</td>
+                      <td className="px-4 py-2.5 text-right tabular-nums text-foreground">{Number(entry.gas_ppm ?? entry.co2).toFixed(0)}</td>
+                      <td className="px-4 py-2.5 text-right tabular-nums text-muted-foreground">{entry.gas_raw ?? "—"}</td>
                       <td className="px-4 py-2.5 text-right tabular-nums text-foreground">{entry.quantity}</td>
                       <td className="px-4 py-2.5 text-center">
                         <span className={`inline-block rounded px-2 py-0.5 text-[10px] font-semibold uppercase ${riskColor(entry.risk_level)}`}>

@@ -1,4 +1,26 @@
-const BASE = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:5050";
+const DEFAULT_BASE_URL = "http://localhost:5050";
+
+export function getApiBaseUrl() {
+  return import.meta.env.VITE_API_BASE_URL ?? DEFAULT_BASE_URL;
+}
+
+const BASE = getApiBaseUrl();
+
+export class BackendUnavailableError extends Error {
+  constructor(message?: string) {
+    super(message ?? `Backend unavailable. Start the backend on ${BASE}`);
+    this.name = "BackendUnavailableError";
+  }
+}
+
+async function apiFetch(input: RequestInfo | URL, init?: RequestInit) {
+  try {
+    return await fetch(input, init);
+  } catch (err) {
+    if (err instanceof DOMException && err.name === "AbortError") throw err;
+    throw new BackendUnavailableError();
+  }
+}
 
 export interface SensorData {
   temperature: number;
@@ -55,9 +77,12 @@ export interface PriceForecast {
 export interface SensorHistoryEntry {
   id: number;
   timestamp: string;
+  device_id?: string | null;
   temperature: number;
   humidity: number;
   co2: number;
+  gas_raw?: number | null;
+  gas_ppm?: number | null;
   quantity: number;
   risk_level: string;
   risk_score: number;
@@ -65,7 +90,7 @@ export interface SensorHistoryEntry {
 }
 
 export async function getCurrentStatus(): Promise<DashboardData | null> {
-  const res = await fetch(`${BASE}/api/current-status`);
+  const res = await apiFetch(`${BASE}/api/current-status`);
   if (!res.ok) throw new Error("Failed to fetch status");
   const json = await res.json();
   if (json && typeof json === "object" && "status" in json && (json as any).status === "no_data") return null;
@@ -74,7 +99,7 @@ export async function getCurrentStatus(): Promise<DashboardData | null> {
 
 export async function submitManualInput(data: SensorData): Promise<DashboardData> {
   const wheatQuantity = data.quantity ?? 100;
-  const res = await fetch(`${BASE}/api/manual-input`, {
+  const res = await apiFetch(`${BASE}/api/manual-input`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -92,7 +117,7 @@ export async function submitManualInput(data: SensorData): Promise<DashboardData
 }
 
 export async function getPriceForecast(): Promise<PriceForecast> {
-  const res = await fetch(`${BASE}/api/price-forecast`);
+  const res = await apiFetch(`${BASE}/api/price-forecast`);
   if (!res.ok) {
     const err = await res.json().catch(() => null);
     throw new Error(err?.message ?? err?.error ?? "Failed to fetch forecast");
@@ -101,7 +126,7 @@ export async function getPriceForecast(): Promise<PriceForecast> {
 }
 
 export async function getSensorHistory(limit = 200): Promise<SensorHistoryEntry[]> {
-  const res = await fetch(`${BASE}/api/sensor-history?limit=${encodeURIComponent(String(limit))}`);
+  const res = await apiFetch(`${BASE}/api/sensor-history?limit=${encodeURIComponent(String(limit))}`);
   if (!res.ok) {
     const err = await res.json().catch(() => null);
     throw new Error(err?.message ?? err?.error ?? "Failed to fetch history");
@@ -121,7 +146,7 @@ export interface AppNotification {
 }
 
 export async function getNotifications(limit = 50): Promise<AppNotification[]> {
-  const res = await fetch(`${BASE}/api/notifications?limit=${encodeURIComponent(String(limit))}`);
+  const res = await apiFetch(`${BASE}/api/notifications?limit=${encodeURIComponent(String(limit))}`);
   if (!res.ok) {
     const err = await res.json().catch(() => null);
     throw new Error(err?.message ?? err?.error ?? "Failed to fetch notifications");
@@ -130,19 +155,19 @@ export async function getNotifications(limit = 50): Promise<AppNotification[]> {
 }
 
 export async function getUnreadCount(): Promise<number> {
-  const res = await fetch(`${BASE}/api/notifications/unread-count`);
+  const res = await apiFetch(`${BASE}/api/notifications/unread-count`);
   if (!res.ok) return 0;
   const json = await res.json();
   return Number(json.unread ?? 0);
 }
 
 export async function markAllNotificationsRead(): Promise<void> {
-  const res = await fetch(`${BASE}/api/notifications/mark-all-read`, { method: "POST" });
+  const res = await apiFetch(`${BASE}/api/notifications/mark-all-read`, { method: "POST" });
   if (!res.ok) throw new Error("Failed to mark all read");
 }
 
 export async function clearAllNotifications(): Promise<void> {
-  const res = await fetch(`${BASE}/api/notifications/clear`, { method: "POST" });
+  const res = await apiFetch(`${BASE}/api/notifications/clear`, { method: "POST" });
   if (!res.ok) throw new Error("Failed to clear notifications");
 }
 
@@ -156,7 +181,7 @@ export interface SensorConfig {
 }
 
 export async function getSensorConfig(deviceId: string): Promise<SensorConfig | null> {
-  const res = await fetch(`${BASE}/api/sensors/${encodeURIComponent(deviceId)}`);
+  const res = await apiFetch(`${BASE}/api/sensors/${encodeURIComponent(deviceId)}`);
   if (res.status === 404) return null;
   if (!res.ok) {
     const err = await res.json().catch(() => null);
@@ -170,7 +195,7 @@ export async function registerSensorConfig(input: {
   sensor_name?: string | null;
   wheat_quantity: number;
 }): Promise<SensorConfig> {
-  const res = await fetch(`${BASE}/api/sensors/register`, {
+  const res = await apiFetch(`${BASE}/api/sensors/register`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -185,6 +210,6 @@ export async function registerSensorConfig(input: {
 }
 
 export async function resetData(): Promise<void> {
-  const res = await fetch(`${BASE}/api/reset`, { method: "POST" });
+  const res = await apiFetch(`${BASE}/api/reset`, { method: "POST" });
   if (!res.ok) throw new Error("Failed to reset");
 }
