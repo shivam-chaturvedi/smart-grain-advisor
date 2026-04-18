@@ -9,6 +9,7 @@ import {
   markAllNotificationsRead,
   clearAllNotifications,
 } from "@/lib/api";
+import { formatTimestamp } from "@/lib/format";
 import { toast } from "sonner";
 
 const typeMeta: Record<AppNotification["type"], { icon: typeof Bell; bg: string; color: string; label: string }> = {
