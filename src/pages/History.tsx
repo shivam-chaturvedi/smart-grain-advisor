@@ -127,7 +127,8 @@ const History = () => {
                     </span>
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
 
             {/* Desktop table */}
