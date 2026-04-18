@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import Navbar from "@/components/Navbar";
 import BackendUnavailableBanner from "@/components/BackendUnavailableBanner";
 import { BackendUnavailableError, getSensorHistory, type SensorHistoryEntry } from "@/lib/api";
+import { formatTimestamp } from "@/lib/format";
 
 const riskColor = (level: string) => {
   switch (level.toUpperCase()) {
