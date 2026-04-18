@@ -166,7 +166,7 @@ const ScrollHero = ({ onQuickAnalysis }: ScrollHeroProps) => {
               </span>
             </h1>
             <p
-              className="mx-auto mb-10 max-w-2xl text-lg leading-relaxed text-muted-foreground sm:text-xl"
+              className="mx-auto mb-10 max-w-2xl text-lg leading-relaxed text-green-300 sm:text-xl drop-shadow-sm"
               style={{ fontWeight: 300 }}
             >
               AI-powered wheat storage optimization and market timing system.

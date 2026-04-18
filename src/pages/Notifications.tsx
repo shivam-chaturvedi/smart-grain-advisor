@@ -4,10 +4,10 @@ import Navbar from "@/components/Navbar";
 import {
   type AppNotification,
   getNotifications,
-  markAllRead,
-  clearNotifications,
-  seedDemoNotifications,
-} from "@/lib/notifications";
+  markAllNotificationsRead,
+  clearAllNotifications,
+} from "@/lib/api";
+import { toast } from "sonner";
 
 const typeMeta: Record<AppNotification["type"], { icon: typeof Bell; bg: string; color: string; label: string }> = {
   sell:      { icon: TrendingUp,   bg: "bg-success/15",     color: "text-success",     label: "Sell Alert" },
@@ -20,14 +20,36 @@ const Notifications = () => {
   const [items, setItems] = useState<AppNotification[]>([]);
 
   useEffect(() => {
-    seedDemoNotifications();
-    const refresh = () => setItems(getNotifications());
+    const refresh = async () => {
+      try {
+        setItems(await getNotifications(50));
+      } catch {
+        toast.error("Failed to load notifications. Start the backend on http://localhost:5050");
+        setItems([]);
+      }
+    };
     refresh();
-    window.addEventListener("notifications-updated", refresh);
-    return () => window.removeEventListener("notifications-updated", refresh);
   }, []);
 
   const unread = items.filter((i) => !i.read).length;
+
+  const handleMarkAllRead = async () => {
+    try {
+      await markAllNotificationsRead();
+      setItems(await getNotifications(50));
+    } catch {
+      toast.error("Failed to mark notifications read");
+    }
+  };
+
+  const handleClear = async () => {
+    try {
+      await clearAllNotifications();
+      setItems([]);
+    } catch {
+      toast.error("Failed to clear notifications");
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background grain-texture">
@@ -47,11 +69,11 @@ const Notifications = () => {
             </p>
           </div>
           <div className="flex gap-2">
-            <button onClick={markAllRead} className="btn-3d btn-3d-secondary text-sm">
+            <button onClick={handleMarkAllRead} className="btn-3d btn-3d-secondary text-sm">
               <CheckCheck className="h-4 w-4" />
               Mark all read
             </button>
-            <button onClick={clearNotifications} className="btn-3d btn-3d-secondary text-sm">
+            <button onClick={handleClear} className="btn-3d btn-3d-secondary text-sm">
               <Trash2 className="h-4 w-4" />
               Clear
             </button>

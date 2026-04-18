@@ -7,6 +7,7 @@ import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import History from "./pages/History";
 import Notifications from "./pages/Notifications";
+import Conf from "./pages/Conf";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -22,6 +23,7 @@ const App = () => (
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/history" element={<History />} />
           <Route path="/notifications" element={<Notifications />} />
+          <Route path="/conf" element={<Conf />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

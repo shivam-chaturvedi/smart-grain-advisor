@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { mockDashboardData, mockPriceForecast } from "@/lib/mockData";
 import {
   Thermometer,
   Droplets,
@@ -32,7 +31,6 @@ import {
   type PriceForecast,
   type SensorData,
 } from "@/lib/api";
-import { detectChanges } from "@/lib/notifications";
 
 const REFRESH_MS = 30_000;
 
@@ -60,28 +58,22 @@ const Dashboard = () => {
           quantity: Number(qty),
         });
       } else {
-        result = await getCurrentStatus();
+        const status = await getCurrentStatus();
+        if (!status) {
+          setData(null);
+          setForecast(await getPriceForecast());
+          return;
+        }
+        result = status;
       }
       setData(result);
-      detectChanges({
-        action: result.recommendation?.action,
-        temperature: result.temperature,
-        humidity: result.humidity,
-        co2: result.co2,
-      });
 
       const fc = await getPriceForecast();
       setForecast(fc);
-    } catch {
-      toast.error("Backend unavailable — showing demo data");
-      setData(mockDashboardData);
-      setForecast(mockPriceForecast);
-      detectChanges({
-        action: mockDashboardData.recommendation?.action,
-        temperature: mockDashboardData.temperature,
-        humidity: mockDashboardData.humidity,
-        co2: mockDashboardData.co2,
-      });
+    } catch (e) {
+      toast.error("Backend unavailable. Start the backend on http://localhost:5050");
+      setData(null);
+      setForecast(null);
     } finally {
       setLoading(false);
     }
@@ -102,13 +94,22 @@ const Dashboard = () => {
   const handleManualSubmit = async (sensor: SensorData) => {
     setLoading(true);
     try {
+      if (
+        !Number.isFinite(sensor.temperature) ||
+        !Number.isFinite(sensor.humidity) ||
+        !Number.isFinite(sensor.co2) ||
+        !Number.isFinite(sensor.quantity) ||
+        (sensor.quantity ?? 0) <= 0
+      ) {
+        throw new Error("Please enter valid numeric values (quantity must be > 0).");
+      }
       const result = await submitManualInput(sensor);
       setData(result);
       const fc = await getPriceForecast();
       setForecast(fc);
       toast.success("Analysis updated");
-    } catch {
-      toast.error("Submission failed");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Submission failed");
     } finally {
       setLoading(false);
     }
@@ -169,12 +170,20 @@ const Dashboard = () => {
                 </div>
                 <div className="mt-4">
                   <RiskMeter level={data.risk_level} score={data.risk_score} lastUpdated={data.last_updated} />
+                  <p className="mt-2 text-xs leading-relaxed text-muted-foreground" style={{ fontWeight: 300 }}>
+                    Risk Level summarizes spoilage risk from current readings and predicted safe storage days. Higher score means higher risk.
+                  </p>
                 </div>
               </Section>
 
               {/* Confidence */}
               <Section title="Analysis Confidence" icon={BarChart3}>
                 <ConfidenceCircle confidence={data.confidence} flags={data.confidence_flags} />
+                <p className="mt-3 text-xs leading-relaxed text-muted-foreground" style={{ fontWeight: 300 }}>
+                  Confidence is a 0–100 score showing how reliable the analysis is based on sensor validity, extreme-value checks,
+                  and whether the ML models are loaded. Flags indicate: AI Model (models loaded), Valid Data (readings in range),
+                  Normal Values (no extreme conditions).
+                </p>
               </Section>
 
               {/* Storage Status */}
@@ -189,6 +198,9 @@ const Dashboard = () => {
                     style={{ width: `${Math.min((data.safe_storage_days / 60) * 100, 100)}%` }}
                   />
                 </div>
+                <p className="mt-3 text-xs leading-relaxed text-muted-foreground" style={{ fontWeight: 300 }}>
+                  Safe Storage Days is the estimated remaining time before quality becomes unsafe under current conditions.
+                </p>
                 {data.recommendations?.length > 0 && (
                   <ul className="mt-4 space-y-1.5">
                     {data.recommendations.map((r, i) => (
@@ -239,6 +251,9 @@ const Dashboard = () => {
                   bestPrice={forecast?.best_price}
                   trend={forecast?.trend}
                 />
+                <p className="mt-3 text-xs leading-relaxed text-muted-foreground" style={{ fontWeight: 300 }}>
+                  Forecast shows predicted market prices for the next 30 days. “Best Day” is the highest expected price day.
+                </p>
               </Section>
 
               {/* Market Analysis */}
@@ -253,18 +268,71 @@ const Dashboard = () => {
                   </div>
                 </Section>
               )}
-
-              {/* Detailed Report */}
-              {data.detailed_report && (
-                <Section title="Detailed Report" icon={FileText}>
-                  <div className="max-h-56 overflow-y-auto rounded-md border bg-accent/30 p-3 font-mono text-xs leading-relaxed text-foreground/80 whitespace-pre-wrap">
-                    {data.detailed_report}
-                  </div>
-                </Section>
-              )}
             </div>
           </div>
         ) : null}
+
+        {/* Full-width Detailed Report */}
+        {data?.detailed_report ? (
+          <div className="mt-6">
+            <Section title="Detailed Report" icon={FileText}>
+              <div className="grid gap-4 lg:grid-cols-3">
+                <div className="lg:col-span-2">
+                  <div className="max-h-[32rem] overflow-y-auto rounded-lg border bg-accent/30 p-4 font-mono text-xs leading-relaxed text-foreground/80 whitespace-pre-wrap break-words">
+                    {data.detailed_report}
+                  </div>
+                </div>
+                <div className="rounded-lg border bg-card p-4 shadow-3d-sm">
+                  <p className="mb-2 text-[11px] uppercase tracking-wider text-muted-foreground" style={{ fontWeight: 500 }}>
+                    Key Insights
+                  </p>
+                  <ul className="space-y-2 text-sm text-foreground/90">
+                    <li>
+                      <span className="text-muted-foreground">Action:</span>{" "}
+                      <span className="font-semibold">{data.recommendation?.action ?? "—"}</span>
+                    </li>
+                    <li className="text-muted-foreground">
+                      {data.recommendation?.reason ?? "No recommendation reason available."}
+                    </li>
+                    <li>
+                      <span className="text-muted-foreground">Risk:</span>{" "}
+                      <span className="font-semibold">{data.risk_level ?? "—"}</span>{" "}
+                      <span className="text-muted-foreground">({data.risk_score?.toFixed(1) ?? "—"}/100)</span>
+                    </li>
+                    <li>
+                      <span className="text-muted-foreground">Safe Storage:</span>{" "}
+                      <span className="font-semibold">{data.safe_storage_days?.toFixed(1) ?? "—"} days</span>
+                    </li>
+                    {forecast ? (
+                      <li>
+                        <span className="text-muted-foreground">Best Sell Day:</span>{" "}
+                        <span className="font-semibold">Day {forecast.best_day}</span>{" "}
+                        <span className="text-muted-foreground">at ₹{forecast.best_price?.toLocaleString()}</span>
+                      </li>
+                    ) : null}
+                    {data.market_analysis ? (
+                      <li>
+                        <span className="text-muted-foreground">Market:</span>{" "}
+                        <span className="font-semibold">{data.market_analysis.trend}</span>{" "}
+                        <span className="text-muted-foreground">({data.market_analysis.volatility?.toFixed(1)}% vol)</span>
+                      </li>
+                    ) : null}
+                    {data.recommendations?.length ? (
+                      <li>
+                        <span className="text-muted-foreground">Notes:</span>{" "}
+                        <span className="text-foreground/90">{data.recommendations.slice(0, 2).join(" • ")}</span>
+                      </li>
+                    ) : null}
+                  </ul>
+                </div>
+              </div>
+            </Section>
+          </div>
+        ) : (
+          <div className="rounded-lg border bg-card p-12 text-center card-shadow">
+            <p className="text-sm text-muted-foreground">No sensor data yet. Use “Manual Input” or send readings to `POST /api/sensor-data`.</p>
+          </div>
+        )}
       </div>
 
       <ManualInputModal open={modalOpen} onClose={() => setModalOpen(false)} onSubmit={handleManualSubmit} />

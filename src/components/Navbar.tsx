@@ -1,21 +1,27 @@
 import { Link, useLocation } from "react-router-dom";
 import { Wheat, Bell } from "lucide-react";
 import { useEffect, useState } from "react";
-import { unreadCount, seedDemoNotifications } from "@/lib/notifications";
+import { getUnreadCount } from "@/lib/api";
 
 const Navbar = () => {
   const { pathname } = useLocation();
   const [count, setCount] = useState(0);
 
   useEffect(() => {
-    seedDemoNotifications();
-    const update = () => setCount(unreadCount());
+    let mounted = true;
+    const update = async () => {
+      try {
+        const unread = await getUnreadCount();
+        if (mounted) setCount(unread);
+      } catch {
+        if (mounted) setCount(0);
+      }
+    };
     update();
-    window.addEventListener("notifications-updated", update);
-    window.addEventListener("storage", update);
+    const id = window.setInterval(update, 15_000);
     return () => {
-      window.removeEventListener("notifications-updated", update);
-      window.removeEventListener("storage", update);
+      mounted = false;
+      window.clearInterval(id);
     };
   }, []);
 
@@ -23,6 +29,7 @@ const Navbar = () => {
     { to: "/", label: "Home" },
     { to: "/dashboard", label: "Dashboard" },
     { to: "/history", label: "History" },
+    { to: "/conf", label: "Config" },
   ];
 
   return (

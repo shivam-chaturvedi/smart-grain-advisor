@@ -2,22 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { History as HistoryIcon, Thermometer, Droplets, Wind, AlertTriangle, Loader2, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import Navbar from "@/components/Navbar";
-import { Button } from "@/components/ui/button";
-import { mockSensorHistory } from "@/lib/mockData";
-
-export interface SensorHistoryEntry {
-  id: number;
-  timestamp: string;
-  temperature: number;
-  humidity: number;
-  co2: number;
-  quantity: number;
-  risk_level: string;
-  risk_score: number;
-  source: "sensor" | "manual";
-}
-
-const BASE = import.meta.env.VITE_API_BASE_URL ?? "";
+import { getSensorHistory, type SensorHistoryEntry } from "@/lib/api";
 
 const riskColor = (level: string) => {
   switch (level.toUpperCase()) {
@@ -36,13 +21,11 @@ const History = () => {
   const fetchHistory = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${BASE}/api/sensor-history`);
-      if (!res.ok) throw new Error("Failed");
-      const json = await res.json();
+      const json = await getSensorHistory(200);
       setData(json);
     } catch {
-      toast.info("Using demo history data");
-      setData(mockSensorHistory);
+      toast.error("Failed to load history. Start the backend on http://localhost:5050");
+      setData([]);
     } finally {
       setLoading(false);
     }
