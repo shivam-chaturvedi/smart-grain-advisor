@@ -184,4 +184,11 @@ const SummaryCard = ({ icon: Icon, label, value, accent }: { icon: typeof Thermo
   </div>
 );
 
+const MobileMini = ({ label, value }: { label: string; value: string }) => (
+  <div className="rounded-lg border bg-muted/30 px-2 py-1.5 text-center">
+    <p className="text-[9px] uppercase tracking-wider text-muted-foreground" style={{ fontWeight: 500 }}>{label}</p>
+    <p className="text-xs tabular-nums text-foreground" style={{ fontWeight: 500 }}>{value}</p>
+  </div>
+);
+
 export default History;
