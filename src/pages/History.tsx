@@ -97,10 +97,19 @@ const History = () => {
           <>
             {/* Mobile card list */}
             <div className="grid gap-3 sm:hidden">
-              {data.map((entry) => (
+              {data.map((entry) => {
+                const ts = formatTimestamp(entry.timestamp);
+                return (
                 <div key={entry.id} className="rounded-xl border bg-card p-4 shadow-3d-sm">
-                  <div className="flex items-center justify-between gap-2 mb-3">
-                    <span className="font-mono text-[11px] text-muted-foreground truncate">{entry.timestamp}</span>
+                  <div className="flex items-start justify-between gap-2 mb-3">
+                    <div className="min-w-0">
+                      <p className="text-xs text-foreground" style={{ fontWeight: 500 }}>
+                        {ts.weekday}, {ts.date}
+                      </p>
+                      <p className="text-[11px] text-muted-foreground">
+                        {ts.time} · <span className="text-muted-foreground/70">{ts.relative}</span>
+                      </p>
+                    </div>
                     <span className={`shrink-0 inline-block rounded px-2 py-0.5 text-[10px] font-semibold uppercase ${riskColor(entry.risk_level)}`}>
                       {entry.risk_level}
                     </span>
