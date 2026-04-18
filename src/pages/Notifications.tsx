@@ -133,7 +133,7 @@ const Notifications = () => {
                     </div>
                     <h3 className="text-sm sm:text-base text-foreground break-words" style={{ fontWeight: 500 }}>{n.title}</h3>
                     <p className="mt-1 text-xs sm:text-sm leading-relaxed text-muted-foreground break-words" style={{ fontWeight: 300 }}>{n.message}</p>
-                    <p className="mt-2 text-[11px] sm:text-xs text-muted-foreground/70">{n.timestamp}</p>
+                    <p className="mt-2 text-[11px] sm:text-xs text-muted-foreground/70">{formatTimestamp(n.timestamp).full} <span className="text-muted-foreground/50">· {formatTimestamp(n.timestamp).relative}</span></p>
                   </div>
                 </div>
               );
