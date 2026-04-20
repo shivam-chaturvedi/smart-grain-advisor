@@ -148,7 +148,7 @@ const ScrollHero = ({ onQuickAnalysis }: ScrollHeroProps) => {
           className="absolute inset-0 flex items-center justify-center px-4 transition-opacity duration-500"
           style={{ opacity: endReached ? 0 : 1, pointerEvents: endReached ? "none" : "auto" }}
         >
-          <div className="relative mx-auto max-w-5xl w-full text-center">
+          <div className="relative mx-auto max-w-5xl w-full text-center translate-y-10 sm:translate-y-14">
             <div
               className="mb-4 sm:mb-6 inline-flex max-w-full items-center gap-2 rounded-full border bg-card/70 px-3 py-1.5 text-[10px] sm:text-xs text-muted-foreground shadow-3d-sm backdrop-blur-md"
               style={{ fontWeight: 500 }}
@@ -160,17 +160,21 @@ const ScrollHero = ({ onQuickAnalysis }: ScrollHeroProps) => {
               className="mb-4 sm:mb-6 text-3xl sm:text-5xl md:text-6xl lg:text-7xl tracking-tight text-foreground drop-shadow-sm"
               style={{ fontWeight: 300 }}
             >
-              Smart Sell{" "}
+              Grain{" "}
               <span
                 className="bg-gradient-to-br from-primary to-primary-glow bg-clip-text text-transparent"
                 style={{ fontWeight: 500 }}
               >
-                Advisor
+                OS
               </span>
             </h1>
             <p
-              className="mx-auto mb-6 sm:mb-10 max-w-2xl text-sm sm:text-lg md:text-xl leading-relaxed text-green-300 drop-shadow-sm px-2"
-              style={{ fontWeight: 300 }}
+              className="mx-auto mt-6 sm:mt-8 mb-6 sm:mb-10 max-w-2xl text-sm sm:text-lg md:text-xl leading-relaxed text-white drop-shadow-sm px-2"
+              style={{
+                fontWeight: 600,
+                textShadow:
+                  "0 1px 0 rgba(0,0,0,0.35), 0 3px 10px rgba(0,0,0,0.35), 0 10px 24px rgba(0,0,0,0.25)",
+              }}
             >
               AI-powered wheat storage optimization and market timing system.
               Make data-driven decisions to maximize your harvest value.

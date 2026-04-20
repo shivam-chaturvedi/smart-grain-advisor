@@ -139,7 +139,7 @@ const Index = () => {
       </section>
 
       <footer className="border-t bg-card/50 py-8 text-center text-xs text-muted-foreground" style={{ fontWeight: 300 }}>
-        © {new Date().getFullYear()} Smart Sell Advisor · Built for farmers
+        © {new Date().getFullYear()} GrainOS · Built for farmers
       </footer>
 
       <QuickAnalysisModal open={modal} onClose={() => setModal(false)} />

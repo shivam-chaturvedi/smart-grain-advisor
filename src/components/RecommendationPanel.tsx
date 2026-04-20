@@ -10,20 +10,21 @@ interface Props {
 
 const styles: Record<string, { bg: string; chip: string; glow: string }> = {
   SELL: {
+    bg: "bg-gradient-to-br from-success/10 via-card to-card border-success/30",
+    chip: "bg-success text-success-foreground",
+    glow: "shadow-[0_8px_32px_-4px_hsl(var(--success)/0.35)]",
+  },
+  HOLD: {
     bg: "bg-gradient-to-br from-destructive/10 via-card to-card border-destructive/30",
     chip: "bg-destructive text-destructive-foreground",
     glow: "shadow-[0_8px_32px_-4px_hsl(var(--destructive)/0.35)]",
   },
-  HOLD: {
-    bg: "bg-gradient-to-br from-primary/10 via-card to-card border-primary/30",
-    chip: "bg-primary text-primary-foreground",
-    glow: "shadow-[0_8px_32px_-4px_hsl(var(--primary)/0.35)]",
-  },
 };
 
 const RecommendationPanel = ({ action, reason, recommendedDay, expectedPrice, expectedTotalValue }: Props) => {
-  const upper = action?.toUpperCase() ?? "HOLD";
-  const s = styles[upper] ?? {
+  const upper = (action ?? "").toUpperCase().trim() || "HOLD";
+  const styleKey = upper.startsWith("SELL") ? "SELL" : "HOLD";
+  const s = styles[styleKey] ?? {
     bg: "bg-gradient-to-br from-warning/10 via-card to-card border-warning/30",
     chip: "bg-warning text-warning-foreground",
     glow: "shadow-[0_8px_32px_-4px_hsl(var(--warning)/0.35)]",

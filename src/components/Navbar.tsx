@@ -96,7 +96,7 @@ const Navbar = () => {
             <Wheat className="h-4 w-4 sm:h-5 sm:w-5 text-primary-foreground" />
           </div>
           <span className="text-sm sm:text-base tracking-tight text-foreground truncate" style={{ fontWeight: 500 }}>
-            Smart Sell Advisor
+            GrainOS
           </span>
         </Link>
 

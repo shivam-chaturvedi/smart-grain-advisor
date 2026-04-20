@@ -43,7 +43,7 @@ export async function sendWhatsAppAlerts(
       : "";
 
   const body =
-    `🌾 *Smart Sell Advisor — New Alert${alerts.length > 1 ? "s" : ""} (${alerts.length})*\n` +
+    `🌾 *GrainOS — New Alert${alerts.length > 1 ? "s" : ""} (${alerts.length})*\n` +
     `─────────────────────\n` +
     lines.join("\n─────────────────────\n") +
     `\n─────────────────────\n` +
